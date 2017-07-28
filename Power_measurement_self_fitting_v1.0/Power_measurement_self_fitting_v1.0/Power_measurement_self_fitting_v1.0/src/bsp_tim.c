@@ -5,6 +5,8 @@ uint32_t recv_timeout_start = 0;
 uint32_t recv_timeout_end = 0;
 uint32_t recv_timeout = 0;
 
+uint32_t pool_wait_time = 0;
+
 void TIM2_Configuration(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -123,7 +125,7 @@ void TIM2_IRQHandler(void)
 		}
 		if(recv_timeout_start==1)
 		{
-			if(recv_timeout < 10)
+			if(recv_timeout < pool_wait_time)
 			{
 				recv_timeout++;
 			}

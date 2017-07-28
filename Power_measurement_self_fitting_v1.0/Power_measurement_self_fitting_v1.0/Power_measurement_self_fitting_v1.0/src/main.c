@@ -74,23 +74,70 @@ void system_clk_init(void)
     }
 }
 
-void relay_pin_init(void)
+void more_relay_pin_init(GPIO_TypeDef *GPIOx,uint16_t pin)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	GPIO_InitStructure.GPIO_Pin = pin;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Init(GPIOx, &GPIO_InitStructure);
+}
+
+void load_relay_pin_init(void)
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+
+	more_relay_pin_init(GPIOA,GPIO_Pin_8);//CHO
+	more_relay_pin_init(GPIOC,GPIO_Pin_7);
+	more_relay_pin_init(GPIOC,GPIO_Pin_6);
+	more_relay_pin_init(GPIOB,GPIO_Pin_15);
+	more_relay_pin_init(GPIOB,GPIO_Pin_14);
+	more_relay_pin_init(GPIOB,GPIO_Pin_13);
+	more_relay_pin_init(GPIOB,GPIO_Pin_12);
+	more_relay_pin_init(GPIOB,GPIO_Pin_1);
+	more_relay_pin_init(GPIOB,GPIO_Pin_0);
+	more_relay_pin_init(GPIOC,GPIO_Pin_5);
+	more_relay_pin_init(GPIOC,GPIO_Pin_4);
+	more_relay_pin_init(GPIOA,GPIO_Pin_7);
+	more_relay_pin_init(GPIOA,GPIO_Pin_6);
+	more_relay_pin_init(GPIOA,GPIO_Pin_5);
+	more_relay_pin_init(GPIOA,GPIO_Pin_4);
+	more_relay_pin_init(GPIOA,GPIO_Pin_1);//CH15
+
+	//more_relay_pin_init(GPIOB,GPIO_Pin_4);
+}
+
+
+void source_relay_pin_init(void)
 {
 
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
+
 #if 1
 uint32_t Get_pvi(uint8_t *data,uint32_t len,float *p,float *v,float *i)
 {
@@ -158,37 +205,6 @@ uint32_t Get_float_mantissa_len(float *data)
 			return 4;
 }
 
-void write_data_to_nextion(uint8_t type,uint8_t *data,uint32_t len)
-{
-	uint8_t data_tail[3] = {0xff,0xff,0xff};
-
-	if(type==P_T0_CONTROL_TYPE)
-	{
-		Nextion_usart_write((uint8_t*)"t0.txt=\"",8);
-		Nextion_usart_write(data,len);
-		Nextion_usart_write((uint8_t*)"\"",1);
-	}
-	else if(type==V_T1_CONTROL_TYPE)
-	{
-		Nextion_usart_write((uint8_t*)"t1.txt=\"",8);
-		Nextion_usart_write(data,len);
-		Nextion_usart_write((uint8_t*)"\"",1);
-	}
-	else if(type==I_T2_CONTROL_TYPE)
-	{
-		Nextion_usart_write((uint8_t*)"t2.txt=\"",8);
-		Nextion_usart_write(data,len);
-		Nextion_usart_write((uint8_t*)"\"",1);
-	}
-	else if(type==STA_CONTROL_TYPE)
-	{
-		Nextion_usart_write((uint8_t*)"t7.txt=\"",8);
-		Nextion_usart_write(data,len);
-		Nextion_usart_write((uint8_t*)"\"",1);
-	}
-
-	Nextion_usart_write(data_tail,3);
-}
 
 void key_operate(void)
 {
@@ -235,6 +251,7 @@ int main(int argc, char* argv[])
 	uint8_t a_buf[10] = {0};
 	uint8_t b_buf[10] = {0};
 	uint8_t r_buf[10] = {0};
+	uint8_t buf[500] = {0};
 
 	float a = 0.0f;
 	float b = 0.0f;
@@ -242,20 +259,23 @@ int main(int argc, char* argv[])
 
 	uint8_t a_index=0;
 	uint8_t b_index=0;
+	uint32_t len = 0;
 
 	system_clk_init();
 
-	//CSE7766_usart_init();
-	//AC6530_usart_init();
-	//Nextion_usart_init();
+	CSE7766_usart_init();
+	AC6530_usart_init();
+	External_usart_init();
 	Debug_usart_init();
 
-	//relay_pin_init();
-	//tim_init();
-	//initDataPool(&cse7766rx);
-	//initDataPool(&ac6530rx);
+	source_relay_pin_init();
+	load_relay_pin_init();
+	tim_init();
+	initDataPool(&cse7766rx);
+	initDataPool(&ac6530rx);
+	initDataPool(&externalrx);
 
-	iic_2864_ssd1306_init();
+	//iic_2864_ssd1306_init();
 
 	//lcd_show_init();
 
@@ -281,10 +301,15 @@ int main(int argc, char* argv[])
 	iic_2864_Puts(b_index,1,b_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(0,2,r_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 
-
+	CH16_HIGH
 	while (1)
     {
 		key_operate();
+		len = pool_recv_one_command(&cse7766rx,buf,500,CSE_7766_POOL);
+		if(len > 0)
+		{
+			Debug_usart_write(buf,len,'Y');
+		}
     }
 }
 #pragma GCC diagnostic pop

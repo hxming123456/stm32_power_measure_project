@@ -18,9 +18,11 @@ typedef struct DataPool{
 
 Datapool cse7766rx;
 Datapool ac6530rx;
+Datapool externalrx;
 
 #define CSE_7766_POOL	0
 #define AC_6530_POOL	1
+#define EXTERNAL_POOL	2
 
 uint8_t initDataPool(Datapool *obj);
 uint32_t updateRing(uint32_t len,uint32_t n);
