@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/Data_pool.c \
+../src/Fitting_method.c \
 ../src/_write.c \
 ../src/bsp_iic_2864.c \
 ../src/bsp_tim.c \
@@ -17,6 +18,7 @@ C_SRCS += \
 
 OBJS += \
 ./src/Data_pool.o \
+./src/Fitting_method.o \
 ./src/_write.o \
 ./src/bsp_iic_2864.o \
 ./src/bsp_tim.o \
@@ -29,6 +31,7 @@ OBJS += \
 
 C_DEPS += \
 ./src/Data_pool.d \
+./src/Fitting_method.d \
 ./src/_write.d \
 ./src/bsp_iic_2864.d \
 ./src/bsp_tim.d \

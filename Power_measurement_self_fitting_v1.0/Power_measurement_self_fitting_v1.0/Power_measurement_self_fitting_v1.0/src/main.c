@@ -13,6 +13,7 @@
 #include "bsp_tim.h"
 #include "Data_pool.h"
 #include "iic_2864_operate.h"
+#include "Fitting_method.h"
 #include "Clib.h"
 // ----------------------------------------------------------------------------
 //
@@ -216,131 +217,75 @@ void lcd_show_init(void)
 	iic_2864_Puts(10,2,(uint8_t *)"A",&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
+
+
 int main(int argc, char* argv[])
 {
-	uint8_t buf[500] = {0};
-	uint32_t len = 24;
-	uint8_t str[10] = {0};
-	uint8_t empy[2] = {0};
-	uint32_t l = 0;
-	uint32_t ret = 0;
-	uint8_t data[24] = {0xf2,0x5a,0x02,0xcb,0xa0,0x00,0x03,0x3d,0x00,0x3d,
-						0x4f,0x00,0x3b,0x03,0x4c,0xfe,0xf0,0x00,0xad,0xca,
-						0x61,0x00,0x04,0x29};
-	float p_7766=0,v_7766=0,i_7766=0;
-	uint8_t p_buf[20] = {0};
-	uint8_t v_buf[20] = {"nihao"};
-	uint8_t i_buf[20] = {0};
+	//float x[11] = {
+	//		50.328392,98.841822,482.389191,528.663540,576.445003,949.242083,
+	//		998.171312,1410.955474,1455.070864,1869.162072,2322.495958};
+	//float y[11] = {52,101.83,491.36,539.53,587.22,968.73,1017.53,
+	//			  1447.5,1485.93,1914.72,2381.25};
+
+	float x[11] = {0.226856,0.444463,2.163232,2.377381,2.589446,4.273389,4.493904,
+					6.365462,6.563147,8.465073,10.510610};
+	float y[11] = {0.26,0.47,2.24,2.46,2.68,4.4,4.64,6.58,6.67,8.71,10.84};
+
+
+	uint8_t a_buf[10] = {0};
+	uint8_t b_buf[10] = {0};
+	uint8_t r_buf[10] = {0};
+
+	float a = 0.0f;
+	float b = 0.0f;
+	float r = 0.0f;
+
+	uint8_t a_index=0;
+	uint8_t b_index=0;
 
 	system_clk_init();
 
-	CSE7766_usart_init();
-	AC6530_usart_init();
-	Nextion_usart_init();
+	//CSE7766_usart_init();
+	//AC6530_usart_init();
+	//Nextion_usart_init();
 	Debug_usart_init();
 
-	relay_pin_init();
-	tim_init();
-	initDataPool(&cse7766rx);
-	initDataPool(&ac6530rx);
+	//relay_pin_init();
+	//tim_init();
+	//initDataPool(&cse7766rx);
+	//initDataPool(&ac6530rx);
 
 	iic_2864_ssd1306_init();
 
-	lcd_show_init();
+	//lcd_show_init();
 
-#if 1
+	//iic_2864_Puts(2,0,(uint8_t *)"123456",&Font_11x18,(uint8_t)COLOR_WHITE);
+
+	Get_coe_a_b_r(x,y,11,&a,&b,&r);
+	if(a < 0)
+	{
+		a = -a;
+		iic_2864_Puts(0,0,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		a_index++;
+	}
+	if(b < 0)
+	{
+		b = -b;
+		iic_2864_Puts(0,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		b_index++;
+	}
+	flodou_to_string(a,a_buf,1,5);
+	flodou_to_string(b,b_buf,1,5);
+	flodou_to_string(r,r_buf,1,5);
+	iic_2864_Puts(a_index,0,a_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(b_index,1,b_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,r_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+
+
 	while (1)
     {
 		key_operate();
-		len = pool_recv_one_command(&cse7766rx,buf,500,CSE_7766_POOL);
-		//Debug_usart_write(buf,len,'Y');
-#if 1
-		if(count_time_flag==1)
-		{
-			ret = Get_pvi(buf,len,&p_7766,&v_7766,&i_7766);
-			Debug_usart_write(&ret,4,'Y');
-			if(relay_sta==1)//power close
-			{
-				ret = 4;
-				write_data_to_nextion(P_T0_CONTROL_TYPE,empy,2);
-				write_data_to_nextion(V_T1_CONTROL_TYPE,empy,2);
-				write_data_to_nextion(I_T2_CONTROL_TYPE,empy,2);
-				write_data_to_nextion(STA_CONTROL_TYPE,(uint8_t  *)"RELAY_POWER CLOSE",17);
-			}
-			if(ret==1)
-			{
-				flodou_to_string(p_7766,p_buf,Get_float_mantissa_len(&p_7766),2);
-				flodou_to_string(v_7766,v_buf,Get_float_mantissa_len(&v_7766),2);
-				flodou_to_string(i_7766,i_buf,Get_float_mantissa_len(&i_7766),2);
-#if 1
-
-				write_data_to_nextion(P_T0_CONTROL_TYPE,p_buf,str_len(p_buf));
-				write_data_to_nextion(V_T1_CONTROL_TYPE,v_buf,str_len(v_buf));
-				write_data_to_nextion(I_T2_CONTROL_TYPE,i_buf,str_len(i_buf));
-				write_data_to_nextion(STA_CONTROL_TYPE,(uint8_t *)"MEASURE OK",10);
-
-				Debug_usart_write("P:",2,'Y');
-				Debug_usart_write(p_buf,str_len(p_buf),'Y');
-				Debug_usart_write("\r\nV:",4,'Y');
-				Debug_usart_write(v_buf,str_len(v_buf),'Y');
-				Debug_usart_write("\r\nI:",4,'Y');
-				Debug_usart_write(i_buf,str_len(i_buf),'Y');
-				Debug_usart_write("\r\n",2,'Y');
-#endif
-			}
-			else if(ret == 2)
-			{
-				write_data_to_nextion(STA_CONTROL_TYPE,(uint8_t *)"EXCEPT CODE:0xF2",16);
-				Debug_usart_write("Packet head error:0xf2\r\n",24,'Y');
-			}
-			else if(ret == 0)
-			{
-				Debug_usart_write("Packet len error\r\n",19,'Y');
-			}
-		}
-#endif
-#if 1
-		//Debug_usart_write("come in\r\n",9,'Y');
-		l = pool_recv_one_command(&ac6530rx,str,10,AC_6530_POOL);
-	//	Debug_usart_write(str,10,'Y');
-		if(l>0)
-		{
-			if(ret==1)
-			{
-				if(strncmp(str,"getv",4)==0)
-				{
-					AC6530_usart_write(v_buf,str_len(v_buf));
-					//Debug_usart_write(v_buf,str_len(v_buf),'Y');
-				}
-				else if(strncmp(str,"geti",4)==0)
-				{
-					AC6530_usart_write(i_buf,str_len(i_buf));
-					//Debug_usart_write(i_buf,str_len(i_buf),'Y');
-				}
-				else if(strncmp(str,"getp",4)==0)
-				{
-					AC6530_usart_write(p_buf,str_len(p_buf));
-					//Debug_usart_write(p_buf,str_len(p_buf),'Y');
-				}
-			}
-			else if(ret == 2)
-			{
-				AC6530_usart_write("Packet head error:0xf2\r\n",24);
-			}
-			else if(ret == 4)
-			{
-				AC6530_usart_write("RELAY_POWER CLOSE\r\n",19);
-			}
-			if(strncmp(str,"getall",6)==0)
-			{
-				AC6530_usart_write(buf,24);
-			}
-		}
-#endif
-		count_time_flag = 0;
-
     }
-#endif
 }
 #pragma GCC diagnostic pop
 

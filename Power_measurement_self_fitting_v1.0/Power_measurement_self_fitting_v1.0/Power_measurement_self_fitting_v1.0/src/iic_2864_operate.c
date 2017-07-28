@@ -121,11 +121,11 @@ uint8_t iic_putc(uint8_t ch,FontDef_t* Font,uint8_t color)
 		{
 			if ((b << j) & 0x8000)
 			{
-				iic_2864_DrawPixel(ss2864.CurrentX + j, (ss2864.CurrentY + i),color);
+				iic_2864_DrawPixel(ss2864.CurrentX + j, (ss2864.CurrentY)+i,color);
 			}
 			else
 			{
-				iic_2864_DrawPixel(ss2864.CurrentX + j, (ss2864.CurrentY + i),!color);
+				iic_2864_DrawPixel(ss2864.CurrentX + j, (ss2864.CurrentY)+i,!color);
 			}
 		}
 	}
@@ -138,8 +138,8 @@ uint8_t iic_putc(uint8_t ch,FontDef_t* Font,uint8_t color)
 
 uint8_t iic_2864_Puts(uint8_t x,uint8_t y,uint8_t* str, FontDef_t* Font, uint8_t color)
 {
-	iic_goto_xy(Font->FontWidth*(x)+1,Font->FontHeight*(y)+1);
 
+	iic_goto_xy(Font->FontWidth*(x)+1,Font->FontHeight*(y)+1);
 	/* Write characters */
 	while (*str) {
 		/* Write character by character */

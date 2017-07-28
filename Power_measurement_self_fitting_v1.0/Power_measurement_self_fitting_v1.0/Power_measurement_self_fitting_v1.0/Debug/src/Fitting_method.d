@@ -1,5 +1,5 @@
-src/main.o: ../src/main.c ../system/include/cmsis/stm32f10x.h \
- ../system/include/cmsis/core_cm3.h \
+src/Fitting_method.o: ../src/Fitting_method.c ../src/Fitting_method.h \
+ ../system/include/cmsis/stm32f10x.h ../system/include/cmsis/core_cm3.h \
  ../system/include/cmsis/core_cmInstr.h \
  ../system/include/cmsis/cmsis_gcc.h \
  ../system/include/cmsis/core_cmFunc.h \
@@ -26,11 +26,9 @@ src/main.o: ../src/main.c ../system/include/cmsis/stm32f10x.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_tim.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
- ../system/include/stm32f1-stdperiph/misc.h \
- ../system/include/diag/Trace.h ../src/bsp_usart.h ../src/Data_pool.h \
- ../src/bsp_tim.h ../src/main.h ../src/iic_2864_operate.h \
- ../src/bsp_iic_2864.h ../src/iic_2864_gpio_simulate.h ../src/fonts.h \
- ../src/Fitting_method.h ../src/Clib.h
+ ../system/include/stm32f1-stdperiph/misc.h
+
+../src/Fitting_method.h:
 
 ../system/include/cmsis/stm32f10x.h:
 
@@ -91,25 +89,3 @@ src/main.o: ../src/main.c ../system/include/cmsis/stm32f10x.h \
 ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h:
 
 ../system/include/stm32f1-stdperiph/misc.h:
-
-../system/include/diag/Trace.h:
-
-../src/bsp_usart.h:
-
-../src/Data_pool.h:
-
-../src/bsp_tim.h:
-
-../src/main.h:
-
-../src/iic_2864_operate.h:
-
-../src/bsp_iic_2864.h:
-
-../src/iic_2864_gpio_simulate.h:
-
-../src/fonts.h:
-
-../src/Fitting_method.h:
-
-../src/Clib.h:
