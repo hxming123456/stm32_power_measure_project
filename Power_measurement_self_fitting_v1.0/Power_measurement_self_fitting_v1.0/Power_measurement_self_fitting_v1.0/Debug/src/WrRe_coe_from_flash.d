@@ -28,7 +28,7 @@ src/WrRe_coe_from_flash.o: ../src/WrRe_coe_from_flash.c \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
  ../system/include/stm32f1-stdperiph/misc.h ../src/main.h \
- ../src/bsp_usart.h ../src/Data_pool.h
+ ../src/bsp_usart.h ../src/Data_pool.h ../src/bsp_internal_flash.h
 
 ../src/WrRe_coe_from_flash.h:
 
@@ -97,3 +97,5 @@ src/WrRe_coe_from_flash.o: ../src/WrRe_coe_from_flash.c \
 ../src/bsp_usart.h:
 
 ../src/Data_pool.h:
+
+../src/bsp_internal_flash.h:

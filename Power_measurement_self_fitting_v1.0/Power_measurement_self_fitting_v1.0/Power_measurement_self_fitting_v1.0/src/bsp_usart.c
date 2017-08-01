@@ -67,7 +67,7 @@ void External_usart_init(void)//usart3
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx|USART_Mode_Tx;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS;
 
 	USART_Init(USART3,&USART_InitStructure);
 
@@ -368,6 +368,10 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 				pool_wait_time = AC6530_WAIT_TIME;
 			}
 			else if(type == EXTERNAL_POOL)
+			{
+				pool_wait_time = EXTERNAL_WAIT_TIME;
+			}
+			else
 			{
 				pool_wait_time = EXTERNAL_WAIT_TIME;
 			}

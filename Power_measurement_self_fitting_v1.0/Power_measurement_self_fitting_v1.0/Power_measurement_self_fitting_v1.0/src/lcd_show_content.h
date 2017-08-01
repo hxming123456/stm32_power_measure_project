@@ -15,6 +15,7 @@ enum{
 	INTER_ADJ,
 	INTER_NOADJ,
 	NO_RETURN,
+	SHOW_ABR,
 }status;
 
 void lcd_show_pvi_info(double p,double v,double i);

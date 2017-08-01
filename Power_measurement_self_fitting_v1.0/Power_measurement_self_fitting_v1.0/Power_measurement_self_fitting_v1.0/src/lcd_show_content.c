@@ -81,11 +81,13 @@ void lcd_show_no_return_info(void)
 
 void lcd_show_coe_abr_info(double a,double b,double r)
 {
-	uint32_t a_index = 0;
-	uint32_t b_index = 0;
+	uint32_t a_index = 4;
+	uint32_t b_index = 4;
 	uint8_t a_buf[10] = {0};
 	uint8_t b_buf[10] = {0};
 	uint8_t r_buf[10] = {0};
+
+	iic_2864_clear_one(SHOW_ABR);
 
 	if(a < 0)
 	{
@@ -96,37 +98,40 @@ void lcd_show_coe_abr_info(double a,double b,double r)
 	if(b < 0)
 	{
 		b = -b;
-		iic_2864_Puts(0,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		iic_2864_Puts(4,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
 		b_index++;
 	}
-	flodou_to_string(a,a_buf,1,5);
-	flodou_to_string(b,b_buf,1,5);
-	flodou_to_string(r,r_buf,1,5);
+	flodou_to_string(a,a_buf,1,4);
+	flodou_to_string(b,b_buf,1,4);
+	flodou_to_string(r,r_buf,1,4);
+
 	iic_2864_Puts(0,0,(uint8_t*)"P_A:",&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(0,1,(uint8_t*)"P_B:",&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(0,2,(uint8_t*)"P_R:",&Font_11x18,(uint8_t)COLOR_WHITE);
-	iic_2864_Puts(a_index+4,0,a_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
-	iic_2864_Puts(b_index+4,1,b_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(a_index,0,a_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(b_index,1,b_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(4,2,r_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
 void lcd_change_percent_info(uint32_t per)
 {
 	uint8_t buf[2] = {0};
+	uint32_t per_tmp = per;
 
-	if(per == 100)
+
+	if(per_tmp == 100)
 	{
 		iic_2864_Puts(5,2,(uint8_t *)"100",&Font_11x18,(uint8_t)COLOR_WHITE);
 	}
-	if(per < 10)
+	if(per_tmp < 10)
 	{
 		buf[0] = per+'0';
 		iic_2864_Puts(5,2,buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	}
 	else
 	{
-		buf[0] = per/10+'0';
-		buf[1] = per%10+'0';
+		buf[0] = per_tmp/10+'0';
+		buf[1] = per_tmp%10+'0';
 		iic_2864_Puts(5,2,buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	}
 }

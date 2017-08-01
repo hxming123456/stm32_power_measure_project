@@ -68,6 +68,16 @@ uint32_t str_len(uint8_t *buf)
 	return buf_len;
 }
 
+void str_cat(uint8_t *dest,uint32_t des_len,uint8_t *str,uint32_t str_len)
+{
+	uint32_t i = 0;
+
+	for(i=0;i<str_len;i++)
+	{
+		dest[des_len+i] = str[i];
+	}
+}
+
 uint32_t Strncpy(uint8_t *dest, uint8_t *src, uint32_t n)
 {
 	uint8_t *strDest = dest;
@@ -324,6 +334,11 @@ uint32_t string_to_flodou(double *number,uint8_t *str,uint32_t len)
 
 #if 1
 	k = len - i;
+	if(k == 1)
+	{
+		*number = int_num;
+		return 1;
+	}
 
 	tmp = 1;
 	for(j=i+1;j<len;j++)
