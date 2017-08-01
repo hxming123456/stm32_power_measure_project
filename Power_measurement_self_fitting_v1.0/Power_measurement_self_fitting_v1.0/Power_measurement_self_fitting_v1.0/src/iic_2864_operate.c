@@ -23,7 +23,7 @@ uint8_t iic_2864_ssd1306_init(void)
 	GPIO_SetBits(GPIOB,GPIO_Pin_6);
 	iic_2864_Delay(100);
 #endif
-	Debug_usart_write("connect ok\r\n",12,'Y');
+	Debug_usart_write("connect ok\r\n",12,INFO_DEBUG);
 
 #if 1
 	SSD1306_WRITECOMMAND(0xae);
@@ -59,7 +59,7 @@ uint8_t iic_2864_ssd1306_init(void)
 	ss2864.CurrentY = 0;
 	ss2864.Initialized = 1;
 
-	Debug_usart_write("2864 init ok\r\n",14,'Y');
+	Debug_usart_write("2864 init ok\r\n",14,INFO_DEBUG);
 	return 1;
 }
 
@@ -70,6 +70,18 @@ uint32_t iic_2864_setxy(uint8_t x,uint8_t y)
 	SSD1306_WRITECOMMAND(((0x0f&x)>>4)|0x01);
 
 	return 0;
+}
+
+void iic_2864_clear_one(uint8_t sta)
+{
+	static uint8_t old_sta = 0;
+
+	if(old_sta != sta)
+	{
+		old_sta = sta;
+		iic_2864_fill(COLOR_BLACK);
+		iic_2864_updatescreen();
+	}
 }
 
 void iic_2864_updatescreen()

@@ -15,5 +15,6 @@ uint32_t str_len(uint8_t *buf);
 void hex_to_str(uint8_t *str,uint8_t hex);
 uint8_t str_to_hex(uint8_t str1,uint8_t str2);
 void more_hex_to_str(uint8_t *str,uint8_t *hex,uint8_t len);
+uint32_t string_to_flodou(double *number,uint8_t *str,uint32_t len);
 
 #endif

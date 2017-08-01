@@ -6,40 +6,49 @@
 C_SRCS += \
 ../src/Data_pool.c \
 ../src/Fitting_method.c \
+../src/WrRe_coe_from_flash.c \
 ../src/_write.c \
 ../src/bsp_iic_2864.c \
+../src/bsp_internal_flash.c \
 ../src/bsp_tim.c \
 ../src/bsp_usart.c \
 ../src/clib.c \
 ../src/fonts.c \
 ../src/iic_2864_gpio_simulate.c \
 ../src/iic_2864_operate.c \
+../src/lcd_show_content.c \
 ../src/main.c 
 
 OBJS += \
 ./src/Data_pool.o \
 ./src/Fitting_method.o \
+./src/WrRe_coe_from_flash.o \
 ./src/_write.o \
 ./src/bsp_iic_2864.o \
+./src/bsp_internal_flash.o \
 ./src/bsp_tim.o \
 ./src/bsp_usart.o \
 ./src/clib.o \
 ./src/fonts.o \
 ./src/iic_2864_gpio_simulate.o \
 ./src/iic_2864_operate.o \
+./src/lcd_show_content.o \
 ./src/main.o 
 
 C_DEPS += \
 ./src/Data_pool.d \
 ./src/Fitting_method.d \
+./src/WrRe_coe_from_flash.d \
 ./src/_write.d \
 ./src/bsp_iic_2864.d \
+./src/bsp_internal_flash.d \
 ./src/bsp_tim.d \
 ./src/bsp_usart.d \
 ./src/clib.d \
 ./src/fonts.d \
 ./src/iic_2864_gpio_simulate.d \
 ./src/iic_2864_operate.d \
+./src/lcd_show_content.d \
 ./src/main.d 
 
 

@@ -150,6 +150,7 @@ void Itoa(int32_t i, uint8_t *string)
 
 }
 
+#if 1
 void flodou_to_string(double number,uint8_t *str,uint8_t int_len,uint8_t dec_len)
 {
 	uint8_t i;
@@ -180,6 +181,7 @@ void flodou_to_string(double number,uint8_t *str,uint8_t int_len,uint8_t dec_len
 	}
 	*(str + int_len + dec_len + 1) = '\0';
 }
+#endif
 
 uint32_t find_the_most_element(uint32_t *data, uint32_t len)
 {
@@ -296,6 +298,51 @@ uint8_t str_to_hex(uint8_t str1,uint8_t str2)
 			tmp |= (10 + (str2 - 'A'));
 	}
 	return tmp;
+}
+
+uint32_t string_to_flodou(double *number,uint8_t *str,uint32_t len)
+{
+	uint32_t i=0,j=0,k=0;
+	double tmp = 1;
+	double int_num = 0;
+	double dec_num = 0;
+
+	for(i=0;i<len;i++)
+	{
+		if(str[i]=='.')
+		{
+			break;
+		}
+	}
+
+	for(j=0;j<i;j++)
+	{
+		int_num += (str[j]-'0');
+		int_num *= 10;
+	}
+	int_num /= 10;
+
+#if 1
+	k = len - i;
+
+	tmp = 1;
+	for(j=i+1;j<len;j++)
+	{
+		dec_num += (str[j]-'0');
+		dec_num *= 10;
+	}
+
+	dec_num /= 10;
+	for(i=0;i<k-1;i++)
+	{
+		tmp *= 10;
+	}
+
+	dec_num /= tmp;
+
+	*number = int_num+dec_num;
+#endif
+	return 1;
 }
 
 

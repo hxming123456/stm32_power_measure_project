@@ -152,7 +152,7 @@ void CSE7766_usart_nvic_init(void)
 
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
@@ -287,8 +287,10 @@ void Debug_usart_write(void *data,uint32_t data_len,uint8_t debug_type)
 uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uint32_t type)
 {
 	uint32_t i = 0;
+	uint32_t j = 0;
 	uint32_t status = 0;
 	uint8_t c = 0;
+	uint8_t head[2] = {0};
 
 	while(1)
 	{
@@ -303,25 +305,51 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 			}
 			else
 			{
-				if(read_one_data_to_datapool(pool_type,&buf[i])==0)
+				if(read_one_data_to_datapool(pool_type,&c)==0)
+				//if(read_one_data_to_datapool(pool_type,&buf[i])==0)
 				{
 					if(type == CSE_7766_POOL)
 					{
-#if 0
-						if(buf[0] == 0xf2 || buf[0] == 0x55)
+#if 1
+						buf[i] = c;
+						if((c >= 0xF0 && c < 0xFF) || (c == 0x55) || (c == 0xAA))
 						{
+							head[0] = c;
+							j = 0;
+						}
+
+						if(j==1 && c==0x5a)
+						{
+							j = 0;
+							head[1] = c;
+							buf[0] = head[0];
+							buf[1] = head[1];
+							i = 1;
+						}
+						i++;
+						j++;
+#else
+						if((buf[0] >= 0xF0 && buf[0] < 0xFF) || (buf[0] == 0x55) || (buf[0] == 0xAA))
+						{
+
 							i++;
+							//if(i==2)
+							//{
+							//	if(buf[1]!=0x5a)
+							//	{
+							//		i = 0;
+							//	}
+							//}
 						}
 						else
 						{
 							i = 0;
 						}
-						if(i==24)
+#endif
+						if(i==24 && buf[0]==0x55)
 						{
 							break;
 						}
-#endif
-						i++;
 					}
 					else
 					{

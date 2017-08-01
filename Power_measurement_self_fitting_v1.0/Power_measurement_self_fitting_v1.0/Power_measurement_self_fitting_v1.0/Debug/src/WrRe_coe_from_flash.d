@@ -1,5 +1,5 @@
-src/iic_2864_operate.o: ../src/iic_2864_operate.c \
- ../src/iic_2864_operate.h ../system/include/cmsis/stm32f10x.h \
+src/WrRe_coe_from_flash.o: ../src/WrRe_coe_from_flash.c \
+ ../src/WrRe_coe_from_flash.h ../system/include/cmsis/stm32f10x.h \
  ../system/include/cmsis/core_cm3.h \
  ../system/include/cmsis/core_cmInstr.h \
  ../system/include/cmsis/cmsis_gcc.h \
@@ -27,11 +27,10 @@ src/iic_2864_operate.o: ../src/iic_2864_operate.c \
  ../system/include/stm32f1-stdperiph/stm32f10x_tim.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
- ../system/include/stm32f1-stdperiph/misc.h ../src/bsp_iic_2864.h \
- ../src/iic_2864_gpio_simulate.h ../src/fonts.h ../src/bsp_usart.h \
- ../src/Data_pool.h
+ ../system/include/stm32f1-stdperiph/misc.h ../src/main.h \
+ ../src/bsp_usart.h ../src/Data_pool.h
 
-../src/iic_2864_operate.h:
+../src/WrRe_coe_from_flash.h:
 
 ../system/include/cmsis/stm32f10x.h:
 
@@ -93,11 +92,7 @@ src/iic_2864_operate.o: ../src/iic_2864_operate.c \
 
 ../system/include/stm32f1-stdperiph/misc.h:
 
-../src/bsp_iic_2864.h:
-
-../src/iic_2864_gpio_simulate.h:
-
-../src/fonts.h:
+../src/main.h:
 
 ../src/bsp_usart.h:
 

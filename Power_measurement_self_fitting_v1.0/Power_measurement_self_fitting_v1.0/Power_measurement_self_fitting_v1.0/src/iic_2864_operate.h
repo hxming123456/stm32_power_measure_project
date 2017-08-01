@@ -7,6 +7,7 @@
 #include "fonts.h"
 #include "stdlib.h"
 #include "string.h"
+#include "bsp_usart.h"
 
 //#define SSD1306_GPIO_INIT()				   		iic_2864_init()
 //#define SSD1306_WRITECOMMAND(command)      		iic_2864_write_one_data(I2C1, 0x78, 0x00, (command))
@@ -34,6 +35,6 @@ void iic_2864_fill(uint8_t color);
 uint8_t iic_putc(uint8_t ch,FontDef_t* Font,uint8_t color);
 uint8_t iic_2864_Puts(uint8_t x,uint8_t y,uint8_t* str, FontDef_t* Font, uint8_t color);
 void iic_2864_DrawPixel(uint32_t x, uint32_t y, uint8_t color);
-
+void iic_2864_clear_one(uint8_t sta);
 
 #endif

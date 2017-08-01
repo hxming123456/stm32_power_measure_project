@@ -1,11 +1,16 @@
 #include "bsp_tim.h"
 #include "Data_pool.h"
+
 int32_t cnt_time = 0;
+
 uint32_t recv_timeout_start = 0;
 uint32_t recv_timeout_end = 0;
+
 uint32_t recv_timeout = 0;
 
 uint32_t pool_wait_time = 0;
+
+
 
 void TIM2_Configuration(void)
 {
@@ -38,8 +43,8 @@ void TIM2_NVIC_Configuration(void)
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
@@ -87,7 +92,7 @@ void delay_s(int32_t scnt)
 
 void key_scan(void)
 {
-	if(RELAY_CONTR_KEY_READ==0)
+	if(RELAY_CONTR_KEY_READ==0 || SELF_ADJUST_KEY_READ==0 || EXTERNAL_KEY_READ==0)
 	{
 	    down_time++;
 	}
