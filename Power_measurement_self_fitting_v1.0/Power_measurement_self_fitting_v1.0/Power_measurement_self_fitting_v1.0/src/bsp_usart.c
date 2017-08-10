@@ -37,6 +37,7 @@ void AC6530_usart_init()//usart1
 	AC6530_usart_gpio_init();
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
 	USART_InitStructure.USART_BaudRate = 9600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -44,7 +45,6 @@ void AC6530_usart_init()//usart1
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx|USART_Mode_Tx;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-
 	USART_Init(USART1,&USART_InitStructure);
 
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
@@ -67,7 +67,7 @@ void External_usart_init(void)//usart3
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx|USART_Mode_Tx;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 
 	USART_Init(USART3,&USART_InitStructure);
 
@@ -118,14 +118,23 @@ void AC6530_usart_gpio_init(void)
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;           //tx
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;			//rx
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;			//cts
+	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	//GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;			//rts
+	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	//GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	//GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
 void External_usart_gpio_init(void)
@@ -176,7 +185,7 @@ void External_usart_nvic_init(void)
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 4;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -294,14 +303,16 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 
 	while(1)
 	{
+		//Debug_usart_write("come\r\n",6,INFO_DEBUG);
 		if(pool_type->stock > 0)
 		{
 			if(i==len)
 			{
-				if(read_one_data_to_datapool(pool_type,&c)==0)
-				{
-					;
-				}
+				//if(read_one_data_to_datapool(pool_type,&c)==0)
+				//{
+				//	;
+				//}
+				break;
 			}
 			else
 			{
@@ -353,12 +364,14 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 					}
 					else
 					{
+						buf[i] = c;
 						i++;
 					}
 				}
 			}
 			recv_timeout_start = 0;
 			recv_timeout_end = 0;
+#if 1
 			if(type == CSE_7766_POOL)
 			{
 				pool_wait_time = CSE7766_WAIT_TIME;
@@ -371,12 +384,7 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 			{
 				pool_wait_time = EXTERNAL_WAIT_TIME;
 			}
-			else
-			{
-				pool_wait_time = EXTERNAL_WAIT_TIME;
-			}
-
-
+#endif
 			status = 0;
 		}
 		else if(status == 0)

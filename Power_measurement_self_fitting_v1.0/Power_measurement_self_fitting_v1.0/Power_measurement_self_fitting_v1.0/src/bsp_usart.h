@@ -5,11 +5,15 @@
 #include "Data_pool.h"
 
 #define DATA_SEND_RECV_DABUG    'N'
-#define INFO_DEBUG   			'N'
+#define INFO_DEBUG   			'Y'
+#define	TEST_DEBUG				'Y'
+#define	CSE7766_DEBUG			'N'
+
 #define CSE7766_WAIT_TIME		10
-#define AC6530_WAIT_TIME		250
-#define	EXTERNAL_WAIT_TIME		500
-#define OTHER_TIME				5000
+#define AC6530_WAIT_TIME		1000
+#define	EXTERNAL_WAIT_TIME		100
+#define OTHER_TIME				2000
+#define C76_10MS_TIME			20
 
 extern uint8_t recv_data_flag;
 extern uint32_t count_time_flag;

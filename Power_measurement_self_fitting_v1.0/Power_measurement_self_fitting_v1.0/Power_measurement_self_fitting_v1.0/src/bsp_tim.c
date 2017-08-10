@@ -9,7 +9,7 @@ uint32_t recv_timeout_end = 0;
 uint32_t recv_timeout = 0;
 
 uint32_t pool_wait_time = 0;
-
+uint32_t external_wait_time = 0;
 
 
 void TIM2_Configuration(void)
@@ -126,6 +126,15 @@ void TIM2_IRQHandler(void)
 			{
 				count_ms = 0;
 				count_time_flag = 1;
+			}
+		}
+		if(external_wait_flag==0)
+		{
+			external_wait_time++;
+			if(external_wait_time == EXTERNAL_COUNT_TIME_VAL)
+			{
+				external_wait_flag=1;
+				external_wait_time = 0;
 			}
 		}
 		if(recv_timeout_start==1)

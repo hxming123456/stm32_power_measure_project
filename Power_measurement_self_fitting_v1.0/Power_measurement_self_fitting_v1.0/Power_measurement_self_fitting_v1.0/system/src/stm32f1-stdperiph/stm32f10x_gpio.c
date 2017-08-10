@@ -180,13 +180,13 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
   assert_param(IS_GPIO_PIN(GPIO_InitStruct->GPIO_Pin));  
   
 /*---------------------------- GPIO Mode Configuration -----------------------*/
-  currentmode = ((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x0F);
+  currentmode = ((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x0F);//0x08
   if ((((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x10)) != 0x00)
   { 
     /* Check the parameters */
     assert_param(IS_GPIO_SPEED(GPIO_InitStruct->GPIO_Speed));
     /* Output mode */
-    currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
+    currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;				//00001011
   }
 /*---------------------------- GPIO CRL Configuration ------------------------*/
   /* Configure the eight low port pins */
@@ -230,17 +230,17 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
     tmpreg = GPIOx->CRH;
     for (pinpos = 0x00; pinpos < 0x08; pinpos++)
     {
-      pos = (((uint32_t)0x01) << (pinpos + 0x08));
+      pos = (((uint32_t)0x01) << (pinpos + 0x08));				//0x0200
       /* Get the port pins position */
-      currentpin = ((GPIO_InitStruct->GPIO_Pin) & pos);
-      if (currentpin == pos)
+      currentpin = ((GPIO_InitStruct->GPIO_Pin) & pos);			//0x0200 & 0x200 = 0
+      if (currentpin == pos)									//0
       {
-        pos = pinpos << 2;
+        pos = pinpos << 2;										//4
         /* Clear the corresponding high control register bits */
-        pinmask = ((uint32_t)0x0F) << pos;
+        pinmask = ((uint32_t)0x0F) << pos;						//11110000
         tmpreg &= ~pinmask;
         /* Write the mode configuration in the corresponding bits */
-        tmpreg |= (currentmode << pos);
+        tmpreg |= (currentmode << pos);							//10110000
         /* Reset the corresponding ODR bit */
         if (GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IPD)
         {

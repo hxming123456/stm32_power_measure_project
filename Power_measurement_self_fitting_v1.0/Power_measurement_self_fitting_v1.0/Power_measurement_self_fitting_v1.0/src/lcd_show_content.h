@@ -16,6 +16,13 @@ enum{
 	INTER_NOADJ,
 	NO_RETURN,
 	SHOW_ABR,
+	SELF_READ_7766_ERR,
+	EXTER_READ_C76_ERR,
+	EXTER_READ_7766_ERR,
+	EXTER_READ_C76PVI_ERR,
+	EXTER_READ_C76PVI_DATA_ERR,
+	KEY_CHANGE,
+	ALL_BLACK,
 }status;
 
 void lcd_show_pvi_info(double p,double v,double i);
@@ -27,5 +34,11 @@ void lcd_show_noad_info(void);
 void lcd_show_err_code_info(uint8_t data);
 void lcd_show_no_return_info(void);
 void lcd_show_coe_abr_info(double a,double b,double r);
+void lcd_show_recvc76_err_info(void);
+void lcd_show_exter_read7766_error_info();
+void lcd_show_exter_readc76pvi_error_info();
+void lcd_show_self_read7766_error_info();
+void lcd_show_self_read6530_error_info();
+void lcd_show_exter_c76pvi_data_error_info();
 
 #endif

@@ -139,9 +139,9 @@ int32_t Atoi(uint8_t *str)
 
 }
 
-void Itoa(int32_t i, uint8_t *string)
+void Itoa(uint32_t i, uint8_t *string)
 {
-	int32_t power = 0, j = 0;
+	uint32_t power = 0, j = 0;
 
 	j = i;
 
@@ -156,7 +156,7 @@ void Itoa(int32_t i, uint8_t *string)
 		i %= power;
 	}
 
-	*string = '\0';
+	//*string = '\0';
 
 }
 
@@ -180,16 +180,19 @@ void flodou_to_string(double number,uint8_t *str,uint8_t int_len,uint8_t dec_len
 		}
 		temp = temp / 10;
 	}
-	*(str + int_len) = '.';
-	temp = 0;
-	t2 = number;
-	for (i = 1; i <= dec_len; i++)
+	if(dec_len > 0)
 	{
-		temp = t2 * 10;
-		str[int_len + i] = (temp % 10)+'0';
-		t2 = t2 * 10;
+		*(str + int_len) = '.';
+		temp = 0;
+		t2 = number;
+		for (i = 1; i <= dec_len; i++)
+		{
+			temp = t2 * 10;
+			str[int_len + i] = (temp % 10)+'0';
+			t2 = t2 * 10;
+		}
+		*(str + int_len + dec_len + 1) = '\0';
 	}
-	*(str + int_len + dec_len + 1) = '\0';
 }
 #endif
 
@@ -334,7 +337,7 @@ uint32_t string_to_flodou(double *number,uint8_t *str,uint32_t len)
 
 #if 1
 	k = len - i;
-	if(k == 1)
+	if(k == 0)
 	{
 		*number = int_num;
 		return 1;

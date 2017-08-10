@@ -8,7 +8,7 @@ uint8_t *str_chr(uint8_t *s, uint8_t c);
 uint32_t Strncpy(uint8_t *dest, uint8_t *src, uint32_t n);
 void clear_string_buf(uint8_t *buf, uint32_t len);
 int32_t Atoi(uint8_t *str);
-void Itoa(int32_t i, uint8_t *string);
+void Itoa(uint32_t i, uint8_t *string);
 void flodou_to_string(double number, uint8_t *str, uint8_t int_len, uint8_t dec_len);
 uint32_t find_the_most_element(uint32_t *data, uint32_t len);
 uint32_t str_len(uint8_t *buf);

@@ -5,6 +5,7 @@ extern uint8_t key_status;
 extern uint8_t key_backup;
 extern uint32_t down_time;
 extern uint32_t up_time;
+extern uint32_t external_wait_flag;
 
 enum
 {
@@ -13,8 +14,8 @@ enum
 }External_sta;
 
 #define RELAY_CONTR_KEY_READ  		  GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_1)
-#define SELF_ADJUST_KEY_READ		  GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_2)
-#define EXTERNAL_KEY_READ			  GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_3)
+#define SELF_ADJUST_KEY_READ		  GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_3)
+#define EXTERNAL_KEY_READ			  GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_2)
 
 #define MORE_RELAY_INIT(a,b)		  more_relay_pin_init(a,b)
 

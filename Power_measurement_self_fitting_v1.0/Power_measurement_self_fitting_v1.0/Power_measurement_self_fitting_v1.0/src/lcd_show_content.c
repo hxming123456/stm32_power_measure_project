@@ -79,6 +79,54 @@ void lcd_show_no_return_info(void)
 	iic_2864_Puts(0,1,(uint8_t *)"No Return..",&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
+void lcd_show_self_read7766_error_info(void)
+{
+	iic_2864_clear_one(SELF_READ_7766_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"Local adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"7766 Err..",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
+void lcd_show_self_read6530_error_info(void)
+{
+	iic_2864_clear_one(SELF_READ_7766_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"Local adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"6530 Err..",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
+void lcd_show_recvc76_err_info(void)
+{
+	iic_2864_clear_one(EXTER_READ_C76_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"exter adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"c76 Err..",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
+void lcd_show_exter_read7766_error_info()
+{
+	iic_2864_clear_one(EXTER_READ_7766_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"exter adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"7766 Err..",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
+void lcd_show_exter_readc76pvi_error_info()
+{
+	iic_2864_clear_one(EXTER_READ_C76PVI_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"exter adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:c76",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"pvi outime.",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
+void lcd_show_exter_c76pvi_data_error_info()
+{
+	iic_2864_clear_one(EXTER_READ_C76PVI_DATA_ERR);
+	iic_2864_Puts(0,0,(uint8_t *)"exter adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:c76",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"Data Err.",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
 void lcd_show_coe_abr_info(double a,double b,double r)
 {
 	uint32_t a_index = 4;
@@ -95,15 +143,15 @@ void lcd_show_coe_abr_info(double a,double b,double r)
 		iic_2864_Puts(0,0,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
 		a_index++;
 	}
-	if(b < 0)
+	if(b < 0.00001)
 	{
 		b = -b;
 		iic_2864_Puts(4,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
 		b_index++;
 	}
-	flodou_to_string(a,a_buf,1,4);
-	flodou_to_string(b,b_buf,1,4);
-	flodou_to_string(r,r_buf,1,4);
+	flodou_to_string(a,a_buf,Get_double_mantissa_len(&a),3);
+	flodou_to_string(b,b_buf,Get_double_mantissa_len(&b),3);
+	flodou_to_string(r,r_buf,Get_double_mantissa_len(&r),3);
 
 	iic_2864_Puts(0,0,(uint8_t*)"P_A:",&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(0,1,(uint8_t*)"P_B:",&Font_11x18,(uint8_t)COLOR_WHITE);
@@ -115,7 +163,7 @@ void lcd_show_coe_abr_info(double a,double b,double r)
 
 void lcd_change_percent_info(uint32_t per)
 {
-	uint8_t buf[2] = {0};
+	uint8_t buf[3] = {0};
 	uint32_t per_tmp = per;
 
 
