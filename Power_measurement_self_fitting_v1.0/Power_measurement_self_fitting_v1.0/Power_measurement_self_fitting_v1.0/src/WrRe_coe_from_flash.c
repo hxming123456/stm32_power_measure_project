@@ -28,6 +28,8 @@ void make_coe_to_data(uint16_t *data)
 	double tmp_coeb_i = self_adjust_coeb_i;
 	double tmp_coer_i = self_adjust_coer_i;
 
+	double tmp_com_v = self_adjust_comv;
+
 	double tmp_coe = 0;
 
 	data[0] = 'Y';
@@ -122,6 +124,21 @@ void make_coe_to_data(uint16_t *data)
 	tmp_int = (uint16_t)tmp_coer_i;
 	data[17] = tmp_int;
 	data[18] = tmp_dec;
+
+	if(tmp_com_v < 0)
+	{
+		tmp_com_v = -tmp_com_v;
+		data[19] = 1;
+	}
+	else
+	{
+		data[19] = 0;
+	}
+	tmp_coe = tmp_com_v-(uint32_t)tmp_com_v;
+	tmp_dec = (tmp_coe*10000);
+	tmp_int = (uint16_t)tmp_com_v;
+	data[20] = tmp_int;
+	data[21] = tmp_dec;
 }
 
 void pars_coe_from_data(uint16_t *data)
@@ -194,15 +211,26 @@ void pars_coe_from_data(uint16_t *data)
 	{
 		self_adjust_coer_i = -(tmp_int+tmp_dec);
 	}
+
+	tmp_int = (double)data[19];
+	tmp_dec = (double)data[20]/10000;
+	if(data[18]==0)
+	{
+		self_adjust_comv = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_comv = -(tmp_int+tmp_dec);
+	}
 }
 
 uint32_t write_coe_from_flash(void)
 {
-	uint16_t data[20] = {0};
+	uint16_t data[22] = {0};
 	uint32_t ret = 0;
 
 	make_coe_to_data(data);
-	ret = flash_write_more_data(FLASH_START_ADDR,data,20);
+	ret = flash_write_more_data(FLASH_START_ADDR,data,22);
 	if(ret)
 	{
 		Debug_usart_write("write flash ok\r\n",16,INFO_DEBUG);
@@ -213,9 +241,9 @@ uint32_t write_coe_from_flash(void)
 
 uint8_t read_coe_from_flash(void)
 {
-	uint16_t data[20] = {0};
+	uint16_t data[22] = {0};
 
-	flash_read_more_data(FLASH_START_ADDR,data,20);
+	flash_read_more_data(FLASH_START_ADDR,data,22);
 
 	if(data[0]=='Y')
 	{

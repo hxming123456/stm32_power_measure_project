@@ -65,6 +65,8 @@ double self_adjust_coea_i = 0;
 double self_adjust_coeb_i = 0;
 double self_adjust_coer_i = 0;
 
+double self_adjust_comv = 0;
+
 double external_adjust_coea_p = 0;
 double external_adjust_coeb_p = 0;
 double external_adjust_coer_p = 0;
@@ -72,6 +74,8 @@ double external_adjust_coer_p = 0;
 double external_adjust_coea_i = 0;
 double external_adjust_coeb_i = 0;
 double external_adjust_coer_i = 0;
+
+double external_adjust_comv = 0;
 
 void system_clk_init(void)
 {
@@ -432,6 +436,7 @@ void Debug_write_coe_info(void)
 	double i_a = self_adjust_coea_i;
 	double i_b = self_adjust_coeb_i;
 	double i_r = self_adjust_coer_i;
+	double c_v = self_adjust_comv;
 
 	Debug_usart_write("P_A:",4,INFO_DEBUG);
 	if(p_a>0)
@@ -516,6 +521,20 @@ void Debug_write_coe_info(void)
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("C_V:",4,INFO_DEBUG);
+	if(c_v>0)
+	{
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+	}
+	else
+	{
+		c_v = -c_v;
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
 }
 
 void key_operate(void)
@@ -551,15 +570,15 @@ void key_operate(void)
 	    	}
 	    }
 	    key_backup = key_status;
-		c = operate_mode + '0';
-		Debug_usart_write("mode:",5,INFO_DEBUG);
-		Debug_usart_write(&c,1,INFO_DEBUG);
-		Debug_usart_write("\r\n",2,INFO_DEBUG);
 		if(operate_mode==0)
 		{
 			iic_2864_clear_one(KEY_CHANGE);
 			lcd_show_pvi_info(0,0,0);
 		}
+		c = operate_mode + '0';
+		Debug_usart_write("mode:",5,INFO_DEBUG);
+		Debug_usart_write(&c,1,INFO_DEBUG);
+		Debug_usart_write("\r\n",2,INFO_DEBUG);
 	}
 	initDataPool(&cse7766rx);
 }
@@ -766,7 +785,7 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	uint8_t p_b_buf[10] = {0};
 	uint8_t i_a_buf[10] = {0};
 	uint8_t i_b_buf[10] = {0};
-	uint8_t v_coe_buf[10] = {'0'};
+	uint8_t v_coe_buf[10] = {0};
 
 	uint8_t test_buf[10] = {0};
 
@@ -793,6 +812,8 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 			i_a_tmp = -i_a;
 	if(i_b_tmp<0)
 			i_b_tmp = -i_b;
+	if(v_coe_tmp<0)
+			v_coe_tmp = -v_coe;
 #if 1
 	if(p_a < 0)
 	{
@@ -830,6 +851,7 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	p_b_tmp *= 1000;
 	i_a_tmp *= 1000;
 	i_b_tmp *= 1000;
+	v_coe_tmp *= 1000;
 
 	if(((uint32_t)p_a_tmp)%10 > 5)
 		p_a_tmp += 10;
@@ -839,11 +861,14 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 		i_a_tmp += 10;
 	if(((uint32_t)i_b_tmp)%10 > 5)
 		i_b_tmp += 10;
+	if(((uint32_t)v_coe_tmp)%10 > 5)
+		v_coe_tmp += 10;
 
 	p_a_tmp /= 10;
 	p_b_tmp /= 10;
 	i_a_tmp /= 10;
 	i_b_tmp /= 10;
+	v_coe_tmp /= 10;
 
 	//Itoa((uint32_t)p_a_tmp,p_a_buf);
 	//Itoa((uint32_t)p_b_tmp,p_b_buf);
@@ -854,6 +879,7 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	flodou_to_string(p_b_tmp,p_b_buf,Get_double_mantissa_len(&p_b_tmp),0);
 	flodou_to_string(i_a_tmp,i_a_buf,Get_double_mantissa_len(&i_a_tmp),0);
 	flodou_to_string(i_b_tmp,i_b_buf,Get_double_mantissa_len(&i_b_tmp),0);
+	flodou_to_string(v_coe_tmp,v_coe_buf,Get_double_mantissa_len(&v_coe_tmp),0);
 
 	if(p_a < 0)
 	{
@@ -883,6 +909,10 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	str_cat(send_data,str_len(send_data),i_b_buf,str_len(i_b_buf));
 	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
 
+	if(v_coe < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
 	str_cat(send_data,str_len(send_data),v_coe_buf,str_len(v_coe_buf));
 
 	External_usart_write(send_data,str_len(send_data));
@@ -932,6 +962,9 @@ int32_t Go_self_adjust(void)
 	double p_tmp_7766[10] = {0};
 	double v_tmp_7766[10] = {0};
 	double i_tmp_7766[10] = {0};
+
+	double ac6530_com_v = 0;
+	double self_com_v = 0;
 
 	for(i=0;i<load_cnt;i++)
 	{
@@ -1108,6 +1141,21 @@ int32_t Go_self_adjust(void)
 	Get_coe_a_b_r(p_7766,p_6530,28,&coea_p,&coeb_p,&coer_p);
 	Get_coe_a_b_r(i_7766,i_6530,28,&coea_i,&coeb_i,&coer_i);
 
+	for(j=0;j<12;j++)
+	{
+		if((v_6530[j] > 0.0001) && (v_7766[j] > 0.0001))
+		{
+			ac6530_com_v += v_6530[j];
+			self_com_v += v_7766[j];
+			k++;
+		}
+	}
+
+	ac6530_com_v /= k;
+	self_com_v /= k;
+
+	self_adjust_comv = ac6530_com_v - self_com_v;
+
 	if((coer_p > 0.9) && (coer_i > 0.9))
 	{
 		self_adjust_coea_p = coea_p;
@@ -1148,6 +1196,7 @@ int32_t Go_external_adjust(void)
 	uint8_t c  = 0;
 	uint8_t ret = 0;
 	uint8_t i = 0,j = 0,k = 0;
+	uint8_t p_cnt = 0,v_cnt = 0,i_cnt = 0;
 	uint8_t m = 0;
 	uint8_t self_buf[240] = {0};
 	uint8_t exter_buf[50] = {0};
@@ -1171,9 +1220,16 @@ int32_t Go_external_adjust(void)
 	double exter_v[28] = {0};
 	double exter_i[28] = {0};
 
+	double exter_pp[28] = {0};
+	double exter_vv[28] = {0};
+	double exter_ii[28] = {0};
+
 	double self_p_tmp[10] = {0};
 	double self_v_tmp[10] = {0};
 	double self_i_tmp[10] = {0};
+
+	double exter_com_v = 0;
+	double self_com_v = 0;
 
 	count_time_flag = 0;
 	if(ad_sta==EXTERNAL_START)
@@ -1195,24 +1251,27 @@ int32_t Go_external_adjust(void)
 					ad_sta++;
 					break;
 				}
+			}
+			else
+			{
+#if 0
+				if(err_cnt < 3)
+				{
+					External_usart_write((uint8_t *)"AT+C76START\r\n",13);
+					Debug_usart_write((uint8_t *)"AT+C76START\r\n",13,INFO_DEBUG);
+					err_cnt++;
+				}
 				else
 				{
-					if(err_cnt < 3)
-					{
-						External_usart_write((uint8_t *)"AT+C76START\r\n",13);
-						Debug_usart_write((uint8_t *)"AT+C76START\r\n",13,INFO_DEBUG);
-						err_cnt++;
-					}
-					else
-					{
-						return -3;
-					}
+					return -3;
 				}
+#endif
 			}
 
 			if(count_time_flag==1)
 			{
 				read_count++;
+				External_usart_write((uint8_t *)"AT+C76START\r\n",13);
 				if(read_count >= 3)
 				{
 					read_count = 0;
@@ -1288,6 +1347,8 @@ int32_t Go_external_adjust(void)
 						}
 						else
 						{
+							memset(ch_sta,0x00, sizeof(ch_sta));
+							operate_ch_relay(ch_sta);
 							return -3;
 						}
 					}
@@ -1301,6 +1362,8 @@ int32_t Go_external_adjust(void)
 						read_count = 0;
 						Debug_usart_write("recv c76 outtime\r\n",18,INFO_DEBUG);
 						count_time_flag = 0;
+						memset(ch_sta,0x00, sizeof(ch_sta));
+						operate_ch_relay(ch_sta);
 						return -3;
 					}
 					count_time_flag = 0;
@@ -1322,10 +1385,9 @@ int32_t Go_external_adjust(void)
 								read_count++;
 								if(read_count >= 10)
 								{
-									Debug_usart_write("read 7766 error\r\n",17,INFO_DEBUG);
 									memset(ch_sta,0x00, sizeof(ch_sta));
 									operate_ch_relay(ch_sta);
-									count_time_flag = 0;
+									Debug_usart_write("read 7766 error\r\n",17,INFO_DEBUG);
 									return -1;
 								}
 								count_time_flag = 0;
@@ -1468,19 +1530,47 @@ int32_t Go_external_adjust(void)
 
 		Debug_usart_write("\r\n",2,TEST_DEBUG);
 #endif
-		Get_coe_a_b_r(exter_p,self_p,load_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
-		Get_coe_a_b_r(exter_i,self_i,load_cnt,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
+		for(m=0;m<load_cnt;m++)
+		{
+			if(exter_p[m] > 0.0001)
+			{
+				exter_pp[p_cnt] = exter_p[m];
+				p_cnt++;
+			}
+			if(exter_i[m] > 0.0001)
+			{
+				exter_ii[i_cnt] = exter_i[m];
+				i_cnt++;
+			}
+			if(self_v[m] > 0.0001 && exter_v[m] > 0.0001)
+			{
+				k++;
+				exter_com_v += exter_v[m];
+				self_com_v += self_v[m];
+			}
+		}
+
+		exter_com_v /= k;
+		self_com_v /= k;
+		external_adjust_comv = self_com_v - exter_com_v;
+
+		Get_coe_a_b_r(exter_pp,self_p,p_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
+		Get_coe_a_b_r(exter_ii,self_i,i_cnt,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
 
 		if((ex_coer_p > 0.9) && (ex_coer_i > 0.9))
 		{
-			Send_result_to_c76(1,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,0);
+			Send_result_to_c76(1,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 			ret = 1;
 		}
 		else
 		{
-			Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,0);
+			Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 		}
 		ret = 0;
+	}
+	else
+	{
+		return -3;
 	}
 
 
@@ -1571,7 +1661,7 @@ int main()
 
 	double p=0,v=0,i=0;
 	uint32_t len = 0;
-
+	uint8_t ch_sta[16] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	uint8_t data[500] = {0};
 	uint8_t err_code[2] = {0};
 	uint8_t ret = 0;
@@ -1597,7 +1687,10 @@ int main()
 	iic_2864_ssd1306_init();
 
 	lcd_show_pvi_info(0,0,0);
+
 	//write_coe_from_flash();
+
+	//operate_ch_relay(ch_sta);
 	while (1)
     {
 #if 0
@@ -1654,13 +1747,14 @@ int main()
 				Debug_usart_write("Come to external_adjust mode\r\n",30,INFO_DEBUG);
 				lcd_show_exter_now_adjust_info();
 				ad_ret = Go_external_adjust();
+				Debug_usart_write("external_adjust over\r\n",22,INFO_DEBUG);
 				if(ad_ret == -3)
 				{
 					lcd_show_recvc76_err_info();
 				}
 				if(ad_ret == -1)
 				{
-					Debug_usart_write("read 7766 err\r\n",15,INFO_DEBUG);
+					Debug_usart_write("read 7766 err.....\r\n",20,INFO_DEBUG);
 					lcd_show_exter_read7766_error_info();
 				}
 				if(ad_ret == -2)

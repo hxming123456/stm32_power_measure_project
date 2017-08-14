@@ -43,6 +43,9 @@ extern double external_adjust_coea_i;
 extern double external_adjust_coeb_i;
 extern double external_adjust_coer_i;
 
+extern double self_adjust_comv;
+extern double external_adjust_comv;
+
 uint32_t Get_double_mantissa_len(double *data);
 uint32_t write_coe_from_flash(void);
 

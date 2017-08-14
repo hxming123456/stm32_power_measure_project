@@ -9,7 +9,7 @@
 #define	TEST_DEBUG				'Y'
 #define	CSE7766_DEBUG			'N'
 
-#define CSE7766_WAIT_TIME		10
+#define CSE7766_WAIT_TIME		100
 #define AC6530_WAIT_TIME		1000
 #define	EXTERNAL_WAIT_TIME		100
 #define OTHER_TIME				2000
