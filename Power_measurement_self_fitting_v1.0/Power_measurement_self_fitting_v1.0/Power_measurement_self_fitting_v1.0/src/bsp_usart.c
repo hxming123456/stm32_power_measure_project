@@ -384,6 +384,10 @@ uint32_t pool_recv_one_command(Datapool *pool_type,uint8_t *buf,uint32_t len,uin
 			{
 				pool_wait_time = EXTERNAL_WAIT_TIME;
 			}
+			else if(type == C76_10MS_TIME)
+			{
+				pool_wait_time = C76_10MS_TIME;
+			}
 #endif
 			status = 0;
 		}

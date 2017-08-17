@@ -79,4 +79,17 @@ void Get_coe_a_b_r(double *array_x,double *array_y,uint32_t len,double *coea,dou
 	*coeb = average_y-(average_x*(*coea));
 	*coer = (gather_xy*gather_xy)/(gather_x2*gather_y2);
 	//*coer = Get_coe_r(array_x,array_y,len);
+
+	gather_xy = 0.0f;
+	gather_x = 0.0f;
+	gather_y = 0.0f;
+	gather_x2 = 0.0f;
+	gather_y2 = 0.0f;
+	gather_x_2 = 0.0f;
+	average_x = 0.0f;
+	average_y = 0.0f;
+
+	coe_a = 0.0f;
+	coe_b = 0.0f;
+	coe_r = 0.0f;
 }

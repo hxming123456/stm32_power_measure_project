@@ -419,7 +419,7 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 	{
 		*ret_p = p*self_adjust_coea_p+self_adjust_coeb_p;
 		*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
-		*ret_v = v;
+		*ret_v = v + self_adjust_comv;
 		return 1;
 	}
 
@@ -569,12 +569,12 @@ void key_operate(void)
 	    			operate_mode = EXTERNAL_ADJUST_MODE;
 	    	}
 	    }
-	    key_backup = key_status;
-		if(operate_mode==0)
+		if(operate_mode==0 && RELAY_CONTR_KEY_READ)
 		{
 			iic_2864_clear_one(KEY_CHANGE);
 			lcd_show_pvi_info(0,0,0);
 		}
+	    key_backup = key_status;
 		c = operate_mode + '0';
 		Debug_usart_write("mode:",5,INFO_DEBUG);
 		Debug_usart_write(&c,1,INFO_DEBUG);
@@ -665,6 +665,10 @@ uint8_t  Check_c76_return_isok(uint8_t *data,uint32_t len)
 
 	for(i=0;i<len;i++)
 	{
+		if(data[i]=='K')
+		{
+			break;
+		}
 		if(data[i]=='\r'||data[i]=='\n'||data[i]==',')
 		{
 			continue;
@@ -915,8 +919,11 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	}
 	str_cat(send_data,str_len(send_data),v_coe_buf,str_len(v_coe_buf));
 
-	External_usart_write(send_data,str_len(send_data));
-	External_usart_write((uint8_t *)"\r\n",2);
+	if(result==1)
+	{
+		External_usart_write(send_data,str_len(send_data));
+		External_usart_write((uint8_t *)"\r\n",2);
+	}
 
 	Debug_usart_write(send_data,str_len(send_data),'Y');
 }
@@ -983,7 +990,7 @@ int32_t Go_self_adjust(void)
 			if(count_time_flag==1)
 			{
 				read_count++;
-				if(read_count >= 5)
+				if(read_count >= 4)
 				{
 					read_count = 0;
 					break;
@@ -1198,7 +1205,7 @@ int32_t Go_external_adjust(void)
 	uint8_t i = 0,j = 0,k = 0;
 	uint8_t p_cnt = 0,v_cnt = 0,i_cnt = 0;
 	uint8_t m = 0;
-	uint8_t self_buf[240] = {0};
+	uint8_t self_buf[120] = {0};
 	uint8_t exter_buf[50] = {0};
 
 	uint8_t test_buf[20] = {0};
@@ -1215,6 +1222,10 @@ int32_t Go_external_adjust(void)
 	double self_p[28] = {0};
 	double self_v[28] = {0};
 	double self_i[28] = {0};
+
+	double self_pp[28] = {0};
+	//double self_vv[28] = {0};
+	double self_ii[28] = {0};
 
 	double exter_p[28] = {0};
 	double exter_v[28] = {0};
@@ -1309,7 +1320,7 @@ int32_t Go_external_adjust(void)
 				if(external_wait_flag==1)
 				{
 					read_count++;
-					if(read_count >= 1)
+					if(read_count >= 7)
 					{
 						read_count = 0;
 						break;
@@ -1319,6 +1330,7 @@ int32_t Go_external_adjust(void)
 			}
 
 			initDataPool(&externalrx);
+			initDataPool(&cse7766rx);
 			External_usart_write((uint8_t *)"AT+C76CAPTURE\r\n",15);
 			Debug_usart_write((uint8_t *)"AT+C76CAPTURE\r\n",15,'Y');
 			while(1)
@@ -1373,8 +1385,10 @@ int32_t Go_external_adjust(void)
 			initDataPool(&cse7766rx);
 			//initDataPool(&externalrx);
 			count_time_flag = 0;
+
 			while(1)
 			{
+#if 0
 				if(load_size[i] > 0)
 				{
 					read_count = 0;
@@ -1385,8 +1399,8 @@ int32_t Go_external_adjust(void)
 								read_count++;
 								if(read_count >= 10)
 								{
-									memset(ch_sta,0x00, sizeof(ch_sta));
-									operate_ch_relay(ch_sta);
+									//memset(ch_sta,0x00, sizeof(ch_sta));
+									//operate_ch_relay(ch_sta);
 									Debug_usart_write("read 7766 error\r\n",17,INFO_DEBUG);
 									return -1;
 								}
@@ -1405,7 +1419,40 @@ int32_t Go_external_adjust(void)
 						}
 						else
 						{
-							memset(&self_buf[24*j],0x00,24);
+							if(self_buf[24*j]!=0)
+							{
+								memset(&self_buf[24*j],0x00,24);
+							}
+						}
+					}
+				}
+#endif
+				for(j=0;j<5;j++)
+				{
+					if(load_size[i]>0)
+					{
+						count_time_flag = 0;
+						while(1)
+						{
+							if(count_time_flag==1)
+							{
+								read_count++;
+								if(read_count >= 10)
+								{
+									memset(&self_buf[24*j],0x00, 24);
+									memset(ch_sta,0x00, sizeof(ch_sta));
+									operate_ch_relay(ch_sta);
+									break;
+								}
+								count_time_flag = 0;
+							}
+							pool_recv_one_command(&cse7766rx,&self_buf[24*j],24,CSE_7766_POOL);
+							Debug_usart_write(&self_buf[24*j],24,CSE7766_DEBUG);
+							ret = Check_data_is_error(&self_buf[24*j],24);
+							if(ret==1)
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -1445,10 +1492,10 @@ int32_t Go_external_adjust(void)
 					self_i_tmp[m] = 0;
 				}
 			}
-			if(k==0)
-			{
-				return -1;
-			}
+			//if(k==0)
+			//{
+			//	return -1;
+			//}
 			for(m=0;m<j;m++)
 			{
 				self_p[i] += self_p_tmp[m];
@@ -1472,12 +1519,17 @@ int32_t Go_external_adjust(void)
 			self_v[i] /= k;
 			self_i[i] /= k;
 
-			//flodou_to_string(self_p[i],test_buf,5,4);
-			//Debug_usart_write(test_buf,10,TEST_DEBUG);
-			//Debug_usart_write("\r\n",2,TEST_DEBUG);
+			flodou_to_string(self_i[i],test_buf,5,4);
+			Debug_usart_write(test_buf,10,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+			flodou_to_string(self_p[i],test_buf,5,4);
+			Debug_usart_write(test_buf,10,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
 
 			self_p[i] = self_p[i]*self_adjust_coea_p+self_adjust_coeb_p;
 			self_i[i] = self_i[i]*self_adjust_coea_i+self_adjust_coeb_i;
+			self_v[i] += self_adjust_comv;
 
 			flodou_to_string(self_p[i],test_buf,4,4);
 			Debug_usart_write(test_buf,9,TEST_DEBUG);
@@ -1498,48 +1550,20 @@ int32_t Go_external_adjust(void)
 
 		lcd_change_percent_info(100);
 #if 1
-		for(m=0;m<load_cnt;m++)
-		{
-			flodou_to_string(exter_p[m],test_buf,Get_double_mantissa_len(&exter_p[m]),3);
-			Debug_usart_write(test_buf,9,TEST_DEBUG);
-			Debug_usart_write("\r\n",2,TEST_DEBUG);
-		}
-		Debug_usart_write("\r\n",2,TEST_DEBUG);
-		for(m=0;m<load_cnt;m++)
-		{
-			flodou_to_string(self_p[m],test_buf_b,Get_double_mantissa_len(&self_p[m]),3);
-			Debug_usart_write(test_buf_b,9,TEST_DEBUG);
-			Debug_usart_write("\r\n",2,TEST_DEBUG);
-		}
-		Debug_usart_write("\r\n",2,TEST_DEBUG);
-		for(m=0;m<load_cnt;m++)
-		{
-			flodou_to_string(exter_i[m],test_buf,Get_double_mantissa_len(&exter_i[m]),3);
-			Debug_usart_write(test_buf,9,TEST_DEBUG);
-			Debug_usart_write("\r\n",2,TEST_DEBUG);
-		}
-
-		Debug_usart_write("\r\n",2,TEST_DEBUG);
-
-		for(m=0;m<load_cnt;m++)
-		{
-			flodou_to_string(self_i[m],test_buf_b,Get_double_mantissa_len(&self_i[m]),3);
-			Debug_usart_write(test_buf_b,9,TEST_DEBUG);
-			Debug_usart_write("\r\n",2,TEST_DEBUG);
-		}
-
 		Debug_usart_write("\r\n",2,TEST_DEBUG);
 #endif
 		for(m=0;m<load_cnt;m++)
 		{
-			if(exter_p[m] > 0.0001)
+			if(exter_p[m] > 0.0001 && self_p[m] > 0.0001)
 			{
 				exter_pp[p_cnt] = exter_p[m];
+				self_pp[p_cnt] = self_p[m];
 				p_cnt++;
 			}
-			if(exter_i[m] > 0.0001)
+			if(exter_i[m] > 0.0001 && self_i[m] > 0.0001)
 			{
 				exter_ii[i_cnt] = exter_i[m];
+				self_ii[i_cnt] = self_i[m];
 				i_cnt++;
 			}
 			if(self_v[m] > 0.0001 && exter_v[m] > 0.0001)
@@ -1550,23 +1574,72 @@ int32_t Go_external_adjust(void)
 			}
 		}
 
+		for(m=0;m<p_cnt;m++)
+		{
+			flodou_to_string(exter_pp[m],test_buf_b,Get_double_mantissa_len(&exter_pp[m]),3);
+			Debug_usart_write(test_buf_b,9,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
+		}
+		Debug_usart_write("\r\n",2,TEST_DEBUG);
+		for(m=0;m<p_cnt;m++)
+		{
+			flodou_to_string(self_pp[m],test_buf_b,Get_double_mantissa_len(&self_pp[m]),3);
+			Debug_usart_write(test_buf_b,9,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
+		}
+		Debug_usart_write("\r\n",2,TEST_DEBUG);
+		for(m=0;m<i_cnt;m++)
+		{
+			flodou_to_string(exter_ii[m],test_buf,Get_double_mantissa_len(&exter_ii[m]),3);
+			Debug_usart_write(test_buf,9,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
+		}
+
+		Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+		for(m=0;m<i_cnt;m++)
+		{
+			flodou_to_string(self_ii[m],test_buf_b,Get_double_mantissa_len(&self_ii[m]),3);
+			Debug_usart_write(test_buf_b,9,TEST_DEBUG);
+			Debug_usart_write("\r\n",2,TEST_DEBUG);
+		}
+
+		Debug_usart_write("\r\n",2,TEST_DEBUG);
+
 		exter_com_v /= k;
 		self_com_v /= k;
 		external_adjust_comv = self_com_v - exter_com_v;
 
-		Get_coe_a_b_r(exter_pp,self_p,p_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
-		Get_coe_a_b_r(exter_ii,self_i,i_cnt,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
+		Get_coe_a_b_r(exter_pp,self_pp,p_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
+		Get_coe_a_b_r(exter_ii,self_ii,i_cnt,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
 
 		if((ex_coer_p > 0.9) && (ex_coer_i > 0.9))
 		{
-			Send_result_to_c76(1,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
-			ret = 1;
+			if((ex_coea_p > 0.7 && ex_coea_p < 1.5) && (ex_coea_i > 0.7 && ex_coea_i < 1.5))
+			{
+				if((ex_coeb_p > -2 && ex_coeb_p < 2) && (ex_coeb_i > -0.05 && ex_coeb_i < 0.05))
+				{
+					Send_result_to_c76(1,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+					ret = 1;
+				}
+				else
+				{
+					Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+					ret = 0;
+				}
+			}
+			else
+			{
+				Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+				ret = 0;
+			}
 		}
 		else
 		{
 			Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+			ret = 0;
 		}
-		ret = 0;
+
 	}
 	else
 	{
@@ -1575,33 +1648,55 @@ int32_t Go_external_adjust(void)
 
 
 	lcd_show_coe_abr_info(ex_coea_p,ex_coeb_p,ex_coer_i);
+	if(ret==1)
+	{
+			count_time_flag = 0;
+			while(1)
+			{
+				len = pool_recv_one_command(&externalrx,test_buf,50,EXTERNAL_POOL);
+				if(len>0)
+				{
+					Debug_usart_write("c76 adj ret:",12,TEST_DEBUG);
+					Debug_usart_write(test_buf,len,TEST_DEBUG);
+					Debug_usart_write("\r\n",2,TEST_DEBUG);
+					break;
+				}
+				if(count_time_flag==1)
+				{
+					read_count++;
+					if(read_count >= 5)
+					{
+						memset(ch_sta,0x00, sizeof(ch_sta));
+						operate_ch_relay(ch_sta);
+						count_time_flag = 0;
+						return 1;
+					}
+					count_time_flag = 0;
+				}
+			}
+	}
+
+	memset(ch_sta,0x00, sizeof(ch_sta));
+	operate_ch_relay(ch_sta);
+
+	count_time_flag = 0;
+	read_count = 0;
+	Debug_usart_write("come\r\n",6,TEST_DEBUG);
 	while(1)
 	{
-		len = pool_recv_one_command(&externalrx,test_buf,50,EXTERNAL_POOL);
-		if(len>0)
-		{
-			Debug_usart_write("c76 adj ret:",12,TEST_DEBUG);
-			Debug_usart_write(test_buf,len,TEST_DEBUG);
-			Debug_usart_write("\r\n",2,TEST_DEBUG);
-			break;
-		}
 		if(count_time_flag==1)
 		{
 			read_count++;
-			if(read_count >= 5)
+			if(read_count >= 2)
 			{
-				memset(ch_sta,0x00, sizeof(ch_sta));
-				operate_ch_relay(ch_sta);
 				count_time_flag = 0;
-				return -1;
+				break;
 			}
 			count_time_flag = 0;
 		}
 	}
+	Debug_usart_write("out\r\n",5,TEST_DEBUG);
 
-
-	memset(ch_sta,0x00, sizeof(ch_sta));
-	operate_ch_relay(ch_sta);
 
 	if(ret==1)
 	{
@@ -1742,6 +1837,7 @@ int main()
 		}
 		else if(operate_mode==EXTERNAL_ADJUST_MODE)
 		{
+			initDataPool(&cse7766rx);
 			if(self_ad_ok_flag==1)
 			{
 				Debug_usart_write("Come to external_adjust mode\r\n",30,INFO_DEBUG);
@@ -1750,27 +1846,39 @@ int main()
 				Debug_usart_write("external_adjust over\r\n",22,INFO_DEBUG);
 				if(ad_ret == -3)
 				{
+					operate_mode = 5;
 					lcd_show_recvc76_err_info();
 				}
 				if(ad_ret == -1)
 				{
+					operate_mode = 5;
 					Debug_usart_write("read 7766 err.....\r\n",20,INFO_DEBUG);
 					lcd_show_exter_read7766_error_info();
 				}
 				if(ad_ret == -2)
 				{
+					operate_mode = 5;
 					lcd_show_exter_readc76pvi_error_info();
 				}
 				if(ad_ret == -4)
 				{
+					operate_mode = 5;
 					lcd_show_exter_c76pvi_data_error_info();
+				}
+				if(ad_ret == 0)
+				{
+					;
+				}
+				if(ad_ret == 1)
+				{
+					operate_mode = 5;
 				}
 			}
 			else
 			{
 				lcd_show_local_noadjust_info();
 			}
-			operate_mode = 5;
+			//Debug_usart_write("set mode 5\r\n",12,INFO_DEBUG);
 		}
 		else if(operate_mode==0)
 		{
