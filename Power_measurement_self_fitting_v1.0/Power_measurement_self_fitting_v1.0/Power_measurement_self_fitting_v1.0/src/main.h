@@ -27,9 +27,13 @@ enum
 #define I_T2_CONTROL_TYPE				2
 #define STA_CONTROL_TYPE				3
 
-extern double self_adjust_coea_p;
-extern double self_adjust_coeb_p;
-extern double self_adjust_coer_p;
+extern double self_adjust_coea_pl;
+extern double self_adjust_coeb_pl;
+extern double self_adjust_coer_pl;
+
+extern double self_adjust_coea_ph;
+extern double self_adjust_coeb_ph;
+extern double self_adjust_coer_ph;
 
 extern double self_adjust_coea_i;
 extern double self_adjust_coeb_i;

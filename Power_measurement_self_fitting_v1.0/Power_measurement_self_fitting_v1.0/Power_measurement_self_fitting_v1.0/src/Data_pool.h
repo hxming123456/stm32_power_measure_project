@@ -3,7 +3,7 @@
 
 #include "stm32f10x.h"
 
-#define DATA_POOL_LEN 	96
+#define DATA_POOL_LEN 	240
 #define DATA_POOL_FULL  -1
 #define DATA_POOL_EMPTY -2
 

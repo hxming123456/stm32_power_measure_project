@@ -127,6 +127,7 @@ void lcd_show_exter_c76pvi_data_error_info()
 	iic_2864_Puts(0,2,(uint8_t *)"Data Err.",&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
+#if 1
 void lcd_show_coe_abr_info(double a,double b,double r)
 {
 	uint32_t a_index = 4;
@@ -159,6 +160,75 @@ void lcd_show_coe_abr_info(double a,double b,double r)
 	iic_2864_Puts(a_index,0,a_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(b_index,1,b_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 	iic_2864_Puts(4,2,r_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+#endif
+
+void lcd_show_coe_allab_info(double p_a,double p_b,double i_a,double i_b)
+{
+	uint32_t pa_index = 2;
+	uint32_t pb_index = 2;
+	uint8_t pa_buf[10] = {0};
+	uint8_t pb_buf[10] = {0};
+
+	uint32_t ia_index = 7;
+	uint32_t ib_index = 7;
+	uint8_t ia_buf[10] = {0};
+	uint8_t ib_buf[10] = {0};
+
+	double pa_tmp = 0;
+	double pb_tmp = 0;
+	double ia_tmp = 0;
+	double ib_tmp = 0;
+
+	iic_2864_clear_one(SHOW_ALL_AB);
+
+	if(p_a < 0)
+	{
+		p_a = -p_a;
+		iic_2864_Puts(2,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		pa_index++;
+	}
+	if(p_b < 0.00001)
+	{
+		p_b = -p_b;
+		iic_2864_Puts(2,2,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		pb_index++;
+	}
+
+	if(i_a < 0)
+	{
+		i_a = -i_a;
+		iic_2864_Puts(7,1,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		ia_index++;
+	}
+	if(i_b < 0.00001)
+	{
+		i_b = -i_b;
+		iic_2864_Puts(7,2,(uint8_t*)"-",&Font_11x18,(uint8_t)COLOR_WHITE);
+		ib_index++;
+	}
+
+	pa_tmp = p_a*1000;
+	pb_tmp = p_b*1000;
+	ia_tmp = i_a*1000;
+	ib_tmp = i_b*1000;
+
+	flodou_to_string(pa_tmp,pa_buf,Get_double_mantissa_len(&pa_tmp),0);
+	flodou_to_string(pb_tmp,pb_buf,Get_double_mantissa_len(&pb_tmp),0);
+	flodou_to_string(ia_tmp,ia_buf,Get_double_mantissa_len(&ia_tmp),0);
+	flodou_to_string(ib_tmp,ib_buf,Get_double_mantissa_len(&ib_tmp),0);
+
+	iic_2864_Puts(2,0,(uint8_t*)"P",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(7,0,(uint8_t*)"I",&Font_11x18,(uint8_t)COLOR_WHITE);
+
+	iic_2864_Puts(0,1,(uint8_t*)"a:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t*)"b:",&Font_11x18,(uint8_t)COLOR_WHITE);
+
+
+	iic_2864_Puts(pa_index,1,pa_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(pb_index,2,pb_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(ia_index,1,ia_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(ib_index,2,ib_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
 void lcd_change_percent_info(uint32_t per)
