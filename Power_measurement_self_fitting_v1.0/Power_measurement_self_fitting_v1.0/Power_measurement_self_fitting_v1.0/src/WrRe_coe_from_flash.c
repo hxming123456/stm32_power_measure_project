@@ -16,21 +16,51 @@ uint32_t Get_double_mantissa_len(double *data)
 			return 4;
 }
 
-void make_coe_to_data(uint16_t *data)
+void make_coe_to_data(uint16_t *data,uint32_t v_type)
 {
 	uint16_t tmp_int = 0;
 	uint16_t tmp_dec = 0;
-	double tmp_coea_p = self_adjust_coea_pl;
-	double tmp_coeb_p = self_adjust_coeb_pl;
-	double tmp_coer_p = self_adjust_coer_pl;
 
-	double tmp_coea_i = self_adjust_coea_i;
-	double tmp_coeb_i = self_adjust_coeb_i;
-	double tmp_coer_i = self_adjust_coer_i;
+	double tmp_coea_p = 0;
+	double tmp_coeb_p = 0;
+	double tmp_coer_p = 0;
+	double tmp_coea_i = 0;
+	double tmp_coeb_i = 0;
+	double tmp_coer_i = 0;
+	double tmp_coea_ph = 0;
+	double tmp_coeb_ph = 0;
+	double tmp_coer_ph = 0;
 
-	double tmp_coea_ph = self_adjust_coea_ph;
-	double tmp_coeb_ph = self_adjust_coeb_ph;
-	double tmp_coer_ph = self_adjust_coer_ph;
+
+	if(v_type == V_220)
+	{
+		tmp_coea_p = self_adjust_coea_pl;
+		tmp_coeb_p = self_adjust_coeb_pl;
+		tmp_coer_p = self_adjust_coer_pl;
+
+		tmp_coea_i = self_adjust_coea_i;
+		tmp_coeb_i = self_adjust_coeb_i;
+		tmp_coer_i = self_adjust_coer_i;
+
+		tmp_coea_ph = self_adjust_coea_ph;
+		tmp_coeb_ph = self_adjust_coeb_ph;
+		tmp_coer_ph = self_adjust_coer_ph;
+	}
+	else
+	{
+		tmp_coea_p = self_adjust_coea_pl_110;
+		tmp_coeb_p = self_adjust_coeb_pl_110;
+		tmp_coer_p = self_adjust_coer_pl_110;
+
+		tmp_coea_i = self_adjust_coea_i_110;
+		tmp_coeb_i = self_adjust_coeb_i_110;
+		tmp_coer_i = self_adjust_coer_i_110;
+
+		tmp_coea_ph = self_adjust_coea_ph_110;
+		tmp_coeb_ph = self_adjust_coeb_ph_110;
+		tmp_coer_ph = self_adjust_coer_ph_110;
+	}
+
 
 	double tmp_com_v = self_adjust_comv;
 
@@ -306,13 +336,137 @@ void pars_coe_from_data(uint16_t *data)
 	}
 }
 
-uint32_t write_coe_from_flash(void)
+void pars_coe110_from_data(uint16_t *data)
+{
+	double tmp_int=0;
+	double tmp_dec=0;
+
+	tmp_int = (double)data[1];
+	tmp_dec = (double)data[2]/10000;
+	if(data[0]==0)
+	{
+		self_adjust_coea_pl_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coea_pl_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[4];
+	tmp_dec = (double)data[5]/10000;
+	if(data[3]==0)
+	{
+		self_adjust_coeb_pl_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coeb_pl_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[7];
+	tmp_dec = (double)data[8]/10000;
+	if(data[6]==0)
+	{
+		self_adjust_coer_pl_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coer_pl_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[10];
+	tmp_dec = (double)data[11]/10000;
+	if(data[9]==0)
+	{
+		self_adjust_coea_i_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coea_i_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[13];
+	tmp_dec = (double)data[14]/10000;
+	if(data[12]==0)
+	{
+		self_adjust_coeb_i_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coeb_i_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[16];
+	tmp_dec = (double)data[17]/10000;
+	if(data[15]==0)
+	{
+		self_adjust_coer_i_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coer_i_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[19];
+	tmp_dec = (double)data[20]/10000;
+	if(data[18]==0)
+	{
+		self_adjust_comv = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_comv = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[22];
+	tmp_dec = (double)data[23]/10000;
+	if(data[21]==0)
+	{
+		self_adjust_coea_ph_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coea_ph_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[25];
+	tmp_dec = (double)data[26]/10000;
+	if(data[24]==0)
+	{
+		self_adjust_coeb_ph_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coeb_ph_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[28];
+	tmp_dec = (double)data[29]/10000;
+	if(data[27]==0)
+	{
+		self_adjust_coer_ph_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coer_ph_110 = -(tmp_int+tmp_dec);
+	}
+}
+
+uint32_t write_coe_from_flash(uint8_t v_type)
 {
 	uint16_t data[31] = {0};
 	uint32_t ret = 0;
 
-	make_coe_to_data(data);
-	ret = flash_write_more_data(FLASH_START_ADDR,data,31);
+	make_coe_to_data(data,v_type);
+	if(v_type==V_220)
+	{
+		ret = flash_write_more_data(FLASH_START_ADDR,data,31);
+	}
+	else
+	{
+		ret = flash_write_more_data(FLASH_START_ADDR_110,data,31);
+	}
+
 	if(ret)
 	{
 		Debug_usart_write("write flash ok\r\n",16,INFO_DEBUG);
@@ -324,12 +478,15 @@ uint32_t write_coe_from_flash(void)
 uint8_t read_coe_from_flash(void)
 {
 	uint16_t data[31] = {0};
+	uint16_t data_110[31] = {0};
 
 	flash_read_more_data(FLASH_START_ADDR,data,31);
+	flash_read_more_data(FLASH_START_ADDR_110,data_110,31);
 
-	if(data[0]=='Y')
+	if(data[0]=='Y' && data_110[0]=='Y')
 	{
 		pars_coe_from_data(&data[1]);
+		pars_coe110_from_data(&data_110[1]);
 		return 1;
 	}
 	else

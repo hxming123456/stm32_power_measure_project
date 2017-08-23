@@ -69,6 +69,18 @@ double self_adjust_coea_i = 0;
 double self_adjust_coeb_i = 0;
 double self_adjust_coer_i = 0;
 
+double self_adjust_coea_pl_110 = 0;
+double self_adjust_coeb_pl_110 = 0;
+double self_adjust_coer_pl_110 = 0;
+
+double self_adjust_coea_ph_110 = 0;
+double self_adjust_coeb_ph_110 = 0;
+double self_adjust_coer_ph_110 = 0;
+
+double self_adjust_coea_i_110 = 0;
+double self_adjust_coeb_i_110 = 0;
+double self_adjust_coer_i_110 = 0;
+
 double self_adjust_comv = 0;
 
 double external_adjust_coea_p = 0;
@@ -421,16 +433,34 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 	ret = Get_origin_pvi(data,len,&p,&v,&i);
 	if(ret==1)
 	{
-		if(*ret_p > 1000)
+		if(*ret_v < 200)
 		{
-			*ret_p = p*self_adjust_coea_ph+self_adjust_coeb_ph;
+			if(*ret_p > 300.f)
+			{
+				p *= 10;
+				*ret_p = p*self_adjust_coea_ph_110+self_adjust_coeb_ph_110;
+				*ret_p /= 10;
+			}
+			else
+			{
+				*ret_p = p*self_adjust_coea_pl_110+self_adjust_coeb_pl_110;
+			}
+			*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
 		}
 		else
 		{
-			*ret_p = p*self_adjust_coea_pl+self_adjust_coeb_pl;
+			if(*ret_p > 1000)
+			{
+				*ret_p = p*self_adjust_coea_ph+self_adjust_coeb_ph;
+			}
+			else
+			{
+				*ret_p = p*self_adjust_coea_pl+self_adjust_coeb_pl;
+			}
+			*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
 		}
 
-		*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
+
 		*ret_v = v + self_adjust_comv;
 		return 1;
 	}
@@ -438,6 +468,164 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 	return ret;
 }
 
+
+void Debug_write_coe110_info(void)
+{
+	uint8_t buf[10] = {0};
+	double p_a = self_adjust_coea_pl_110;
+	double p_b = self_adjust_coeb_pl_110;
+	double p_r = self_adjust_coer_pl_110;
+
+	double ph_a = self_adjust_coea_ph_110;
+	double ph_b = self_adjust_coeb_ph_110;
+	double ph_r = self_adjust_coer_ph_110;
+
+	double i_a = self_adjust_coea_i_110;
+	double i_b = self_adjust_coeb_i_110;
+	double i_r = self_adjust_coer_i_110;
+
+	double c_v = self_adjust_comv;
+
+	Debug_usart_write("PL_A_110:",9,INFO_DEBUG);
+	if(p_a>0)
+	{
+		flodou_to_string(p_a,buf,Get_double_mantissa_len(&p_a),4);
+	}
+	else
+	{
+		p_a = -p_a;
+		flodou_to_string(p_a,buf,Get_double_mantissa_len(&p_a),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("PL_B_110:",9,INFO_DEBUG);
+	if(p_b>0)
+	{
+		flodou_to_string(p_b,buf,Get_double_mantissa_len(&p_b),4);
+	}
+	else
+	{
+		p_b = -p_b;
+		flodou_to_string(p_b,buf,Get_double_mantissa_len(&p_b),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("PL_R_110:",9,INFO_DEBUG);
+	if(p_r>0)
+	{
+		flodou_to_string(p_r,buf,Get_double_mantissa_len(&p_r),4);
+	}
+	else
+	{
+		p_r = -p_r;
+		flodou_to_string(p_r,buf,Get_double_mantissa_len(&p_r),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
+	//////////////////////////////////////////////////////////////////////////////////
+	Debug_usart_write("PH_A_110:",9,INFO_DEBUG);
+	if(p_a>0)
+	{
+		flodou_to_string(ph_a,buf,Get_double_mantissa_len(&ph_a),4);
+	}
+	else
+	{
+		p_a = -p_a;
+		flodou_to_string(ph_a,buf,Get_double_mantissa_len(&ph_a),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("PH_B_110:",9,INFO_DEBUG);
+	if(p_b>0)
+	{
+		flodou_to_string(ph_b,buf,Get_double_mantissa_len(&ph_b),4);
+	}
+	else
+	{
+		p_b = -p_b;
+		flodou_to_string(ph_b,buf,Get_double_mantissa_len(&ph_b),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("PH_R_110:",9,INFO_DEBUG);
+	if(p_r>0)
+	{
+		flodou_to_string(ph_r,buf,Get_double_mantissa_len(&ph_r),4);
+	}
+	else
+	{
+		p_r = -p_r;
+		flodou_to_string(ph_r,buf,Get_double_mantissa_len(&ph_r),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
+	//////////////////////////////////////////////////////////////////////////////////
+	Debug_usart_write("I_A_110:",8,INFO_DEBUG);
+	if(i_a>0)
+	{
+		flodou_to_string(i_a,buf,Get_double_mantissa_len(&i_a),4);
+	}
+	else
+	{
+		i_a = -i_a;
+		flodou_to_string(i_a,buf,Get_double_mantissa_len(&i_a),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("I_B_110:",8,INFO_DEBUG);
+	if(i_b>0)
+	{
+		flodou_to_string(i_b,buf,Get_double_mantissa_len(&i_b),4);
+	}
+	else
+	{
+		i_b = -i_b;
+		flodou_to_string(i_b,buf,Get_double_mantissa_len(&i_b),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("I_R_110:",8,INFO_DEBUG);
+	if(i_r>0)
+	{
+		flodou_to_string(i_r,buf,Get_double_mantissa_len(&i_r),4);
+	}
+	else
+	{
+		i_r = -i_r;
+		flodou_to_string(i_r,buf,Get_double_mantissa_len(&i_r),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("C_V:",4,INFO_DEBUG);
+	if(c_v>0)
+	{
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+	}
+	else
+	{
+		c_v = -c_v;
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+}
 
 void Debug_write_coe_info(void)
 {
@@ -594,7 +782,7 @@ void Debug_write_coe_info(void)
 		Debug_usart_write("-",1,INFO_DEBUG);
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
-	Debug_usart_write("\r\n",2,INFO_DEBUG);
+	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
 }
 
 void key_operate(void)
@@ -612,6 +800,7 @@ void key_operate(void)
 		    	else
 		    		GPIO_ResetBits(GPIOC,GPIO_Pin_0);
 		    	Debug_write_coe_info();
+		    	Debug_write_coe110_info();
 		    	relay_sta = ~relay_sta;
 	    	}
 	    	if(SELF_ADJUST_KEY_READ==0)
@@ -1253,18 +1442,38 @@ int32_t Go_self_adjust(void)
 
 	if((coer_pl > 0.9) && (coer_i > 0.9) && (coer_ph > 0.9))
 	{
-		self_adjust_coea_pl = coea_pl;
-		self_adjust_coeb_pl = coeb_pl;
-		self_adjust_coer_pl = coer_pl;
+		if(self_com_v > 200)
+		{
+			self_adjust_coea_pl = coea_pl;
+			self_adjust_coeb_pl = coeb_pl;
+			self_adjust_coer_pl = coer_pl;
 
-		self_adjust_coea_ph = coea_ph;
-		self_adjust_coeb_ph = coeb_ph;
-		self_adjust_coer_ph = coer_ph;
+			self_adjust_coea_ph = coea_ph;
+			self_adjust_coeb_ph = coeb_ph;
+			self_adjust_coer_ph = coer_ph;
 
-		self_adjust_coea_i = coea_i;
-		self_adjust_coeb_i = coeb_i;
-		self_adjust_coer_i = coer_i;
-		write_coe_from_flash();
+			self_adjust_coea_i = coea_i;
+			self_adjust_coeb_i = coeb_i;
+			self_adjust_coer_i = coer_i;
+			write_coe_from_flash(V_220);
+		}
+		else
+		{
+			self_adjust_coea_pl_110 = coea_pl;
+			self_adjust_coeb_pl_110 = coeb_pl;
+			self_adjust_coer_pl_110 = coer_pl;
+
+			self_adjust_coea_ph_110 = coea_ph;
+			self_adjust_coeb_ph_110 = coeb_ph;
+			self_adjust_coer_ph_110 = coer_ph;
+
+			self_adjust_coea_i_110 = coea_i;
+			self_adjust_coeb_i_110 = coeb_i;
+			self_adjust_coer_i_110 = coer_i;
+			write_coe_from_flash(V_110);
+		}
+
+
 		ret = 1;
 	}
 
@@ -1287,6 +1496,7 @@ int32_t Go_external_adjust(void)
 	uint8_t ch_sta[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1 2 3 4 5 6 7 8 9 10 60 60 600 600 600 600 600 600
 	//uint32_t load_size[28] = {1,2,3,4,5,6,7,8,9,10,15,60,120,600,660,720,1200,1260,1320,1800,1860,1920,2400,2460,2520,3000,3060,3160};
 	uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
+	//uint32_t load_size[12] = {1,3,6,12,20,50,70,100,170,500,600,1000};
 	uint32_t load_cnt = 16;
 	uint8_t read_count = 0;
 	uint8_t read_c76_count = 0;
@@ -1620,15 +1830,34 @@ int32_t Go_external_adjust(void)
 			Debug_usart_write(test_buf,10,TEST_DEBUG);
 			Debug_usart_write("\r\n",2,TEST_DEBUG);
 
-			if(self_p[i] > 1000)
+			if(self_v[i] < 200)
 			{
-				self_p[i] = self_p[i]*self_adjust_coea_ph+self_adjust_coeb_ph;
+				if(self_p[i] > 300.f)
+				{
+					self_p[i] *= 10;
+					self_p[i] = self_p[i]*self_adjust_coea_ph_110+self_adjust_coeb_ph_110;
+					self_p[i] /= 10;
+				}
+				else
+				{
+					self_p[i] = self_p[i]*self_adjust_coea_pl_110+self_adjust_coeb_pl_110;
+				}
+				self_i[i] = self_i[i]*self_adjust_coea_i_110+self_adjust_coeb_i_110;
 			}
 			else
 			{
-				self_p[i] = self_p[i]*self_adjust_coea_pl+self_adjust_coeb_pl;
+				if(self_p[i] > 1000)
+				{
+					self_p[i] = self_p[i]*self_adjust_coea_ph+self_adjust_coeb_ph;
+				}
+				else
+				{
+					self_p[i] = self_p[i]*self_adjust_coea_pl+self_adjust_coeb_pl;
+				}
+				self_i[i] = self_i[i]*self_adjust_coea_i+self_adjust_coeb_i;
 			}
-			self_i[i] = self_i[i]*self_adjust_coea_i+self_adjust_coeb_i;
+
+
 			self_v[i] += self_adjust_comv;
 
 			flodou_to_string(self_p[i],test_buf,4,4);
@@ -2062,6 +2291,7 @@ int main()
 					self_ad_ok_flag = 1;
 					Debug_usart_write("Get coe ok\r\n",12,INFO_DEBUG);
 					Debug_write_coe_info();
+					Debug_write_coe110_info();
 				}
 				else
 				{

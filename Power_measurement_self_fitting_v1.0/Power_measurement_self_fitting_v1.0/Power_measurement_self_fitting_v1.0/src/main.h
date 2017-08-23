@@ -39,6 +39,18 @@ extern double self_adjust_coea_i;
 extern double self_adjust_coeb_i;
 extern double self_adjust_coer_i;
 
+extern double self_adjust_coea_pl_110;
+extern double self_adjust_coeb_pl_110;
+extern double self_adjust_coer_pl_110;
+
+extern double self_adjust_coea_ph_110;
+extern double self_adjust_coeb_ph_110;
+extern double self_adjust_coer_ph_110;
+
+extern double self_adjust_coea_i_110;
+extern double self_adjust_coeb_i_110;
+extern double self_adjust_coer_i_110;
+
 extern double external_adjust_coea_p;
 extern double external_adjust_coeb_p;
 extern double external_adjust_coer_p;
@@ -51,6 +63,6 @@ extern double self_adjust_comv;
 extern double external_adjust_comv;
 
 uint32_t Get_double_mantissa_len(double *data);
-uint32_t write_coe_from_flash(void);
+uint32_t write_coe_from_flash(uint8_t v_type);
 
 #endif
