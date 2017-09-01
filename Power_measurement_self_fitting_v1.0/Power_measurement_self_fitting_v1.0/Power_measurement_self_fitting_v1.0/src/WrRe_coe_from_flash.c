@@ -30,7 +30,10 @@ void make_coe_to_data(uint16_t *data,uint32_t v_type)
 	double tmp_coea_ph = 0;
 	double tmp_coeb_ph = 0;
 	double tmp_coer_ph = 0;
-
+	double tmp_coea_il = 0;
+	double tmp_coeb_il = 0;
+	double tmp_coer_il = 0;
+	double tmp_com_v = 0;
 
 	if(v_type == V_220)
 	{
@@ -45,6 +48,12 @@ void make_coe_to_data(uint16_t *data,uint32_t v_type)
 		tmp_coea_ph = self_adjust_coea_ph;
 		tmp_coeb_ph = self_adjust_coeb_ph;
 		tmp_coer_ph = self_adjust_coer_ph;
+
+		tmp_coea_il = self_adjust_coea_il;
+		tmp_coeb_il = self_adjust_coeb_il;
+		tmp_coer_il = self_adjust_coer_il;
+
+		tmp_com_v = self_adjust_comv;
 	}
 	else
 	{
@@ -59,10 +68,16 @@ void make_coe_to_data(uint16_t *data,uint32_t v_type)
 		tmp_coea_ph = self_adjust_coea_ph_110;
 		tmp_coeb_ph = self_adjust_coeb_ph_110;
 		tmp_coer_ph = self_adjust_coer_ph_110;
+
+		tmp_coea_il = self_adjust_coea_il_110;
+		tmp_coeb_il = self_adjust_coeb_il_110;
+		tmp_coer_il = self_adjust_coer_il_110;
+
+		tmp_com_v = self_adjust_comv_110;
 	}
 
 
-	double tmp_com_v = self_adjust_comv;
+
 
 	double tmp_coe = 0;
 
@@ -218,6 +233,51 @@ void make_coe_to_data(uint16_t *data,uint32_t v_type)
 	tmp_int = (uint16_t)tmp_coer_ph;
 	data[29] = tmp_int;
 	data[30] = tmp_dec;
+
+	if(tmp_coea_il < 0)
+	{
+		tmp_coea_il = -tmp_coea_il;
+		data[31] = 1;
+	}
+	else
+	{
+		data[31] = 0;
+	}
+	tmp_coe = tmp_coea_il-(uint32_t)tmp_coea_il;
+	tmp_dec = (tmp_coe*10000);
+	tmp_int = (uint16_t)tmp_coea_il;
+	data[32] = tmp_int;
+	data[33] = tmp_dec;
+
+	if(tmp_coeb_il < 0)
+	{
+		tmp_coeb_il = -tmp_coeb_il;
+		data[34] = 1;
+	}
+	else
+	{
+		data[34] = 0;
+	}
+	tmp_coe = tmp_coeb_il-(uint32_t)tmp_coeb_il;
+	tmp_dec = (tmp_coe*10000);
+	tmp_int = (uint16_t)tmp_coeb_il;
+	data[35] = tmp_int;
+	data[36] = tmp_dec;
+
+	if(tmp_coer_il < 0)
+	{
+		tmp_coer_il = -tmp_coer_il;
+		data[37] = 1;
+	}
+	else
+	{
+		data[37] = 0;
+	}
+	tmp_coe = tmp_coer_il-(uint32_t)tmp_coer_il;
+	tmp_dec = (tmp_coe*10000);
+	tmp_int = (uint16_t)tmp_coer_il;
+	data[38] = tmp_int;
+	data[39] = tmp_dec;
 }
 
 void pars_coe_from_data(uint16_t *data)
@@ -334,6 +394,39 @@ void pars_coe_from_data(uint16_t *data)
 	{
 		self_adjust_coer_ph = -(tmp_int+tmp_dec);
 	}
+
+	tmp_int = (double)data[31];
+	tmp_dec = (double)data[32]/10000;
+	if(data[30]==0)
+	{
+		self_adjust_coea_il = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coea_il = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[34];
+	tmp_dec = (double)data[35]/10000;
+	if(data[33]==0)
+	{
+		self_adjust_coeb_il = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coeb_il = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[37];
+	tmp_dec = (double)data[38]/10000;
+	if(data[36]==0)
+	{
+		self_adjust_coer_il = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coer_il = -(tmp_int+tmp_dec);
+	}
 }
 
 void pars_coe110_from_data(uint16_t *data)
@@ -411,11 +504,11 @@ void pars_coe110_from_data(uint16_t *data)
 	tmp_dec = (double)data[20]/10000;
 	if(data[18]==0)
 	{
-		self_adjust_comv = tmp_int+tmp_dec;
+		self_adjust_comv_110 = tmp_int+tmp_dec;
 	}
 	else
 	{
-		self_adjust_comv = -(tmp_int+tmp_dec);
+		self_adjust_comv_110 = -(tmp_int+tmp_dec);
 	}
 
 	tmp_int = (double)data[22];
@@ -450,21 +543,54 @@ void pars_coe110_from_data(uint16_t *data)
 	{
 		self_adjust_coer_ph_110 = -(tmp_int+tmp_dec);
 	}
+
+	tmp_int = (double)data[31];
+	tmp_dec = (double)data[32]/10000;
+	if(data[30]==0)
+	{
+		self_adjust_coea_il_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coea_il_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[34];
+	tmp_dec = (double)data[35]/10000;
+	if(data[33]==0)
+	{
+		self_adjust_coeb_il_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coeb_il_110 = -(tmp_int+tmp_dec);
+	}
+
+	tmp_int = (double)data[37];
+	tmp_dec = (double)data[38]/10000;
+	if(data[36]==0)
+	{
+		self_adjust_coer_il_110 = tmp_int+tmp_dec;
+	}
+	else
+	{
+		self_adjust_coer_il_110 = -(tmp_int+tmp_dec);
+	}
 }
 
 uint32_t write_coe_from_flash(uint8_t v_type)
 {
-	uint16_t data[31] = {0};
+	uint16_t data[40] = {0};
 	uint32_t ret = 0;
 
 	make_coe_to_data(data,v_type);
 	if(v_type==V_220)
 	{
-		ret = flash_write_more_data(FLASH_START_ADDR,data,31);
+		ret = flash_write_more_data(FLASH_START_ADDR,data,40);
 	}
 	else
 	{
-		ret = flash_write_more_data(FLASH_START_ADDR_110,data,31);
+		ret = flash_write_more_data(FLASH_START_ADDR_110,data,40);
 	}
 
 	if(ret)
@@ -477,11 +603,11 @@ uint32_t write_coe_from_flash(uint8_t v_type)
 
 uint8_t read_coe_from_flash(void)
 {
-	uint16_t data[31] = {0};
-	uint16_t data_110[31] = {0};
+	uint16_t data[40] = {0};
+	uint16_t data_110[40] = {0};
 
-	flash_read_more_data(FLASH_START_ADDR,data,31);
-	flash_read_more_data(FLASH_START_ADDR_110,data_110,31);
+	flash_read_more_data(FLASH_START_ADDR,data,40);
+	flash_read_more_data(FLASH_START_ADDR_110,data_110,40);
 
 	if(data[0]=='Y' && data_110[0]=='Y')
 	{

@@ -17,12 +17,18 @@ void lcd_show_pvi_info(double p,double v,double i)
 
 	flodou_to_string(p,p_buf,Get_double_mantissa_len(&p),2);
 	iic_2864_Puts(3,0,p_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	//Debug_usart_write(p_buf,str_len(p_buf),'Y');
+	//Debug_usart_write("\t",2,'Y');
 
 	flodou_to_string(v,v_buf,Get_double_mantissa_len(&v),2);
 	iic_2864_Puts(3,1,v_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	//Debug_usart_write(v_buf,str_len(v_buf),'Y');
+	//Debug_usart_write("\t",2,'Y');
 
 	flodou_to_string(i,i_buf,Get_double_mantissa_len(&i),2);
 	iic_2864_Puts(3,2,i_buf,&Font_11x18,(uint8_t)COLOR_WHITE);
+	//Debug_usart_write(i_buf,str_len(i_buf),'Y');
+	//Debug_usart_write("\r\n",2,'Y');
 }
 
 void lcd_show_local_noadjust_info(void)

@@ -27,6 +27,9 @@ class printUI(wx.Frame):
         self.panel.SetBackgroundColour("white")
         self.panel.SetForegroundColour("brown")
 
+        self.Arr_7766 = []
+        self.Arr_6530 = []
+
         self.load_file_com = [
               "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9","COM10",
               "COM11","COM12","COM13","COM14","COM15","COM16","COM17","COM18","COM19","COM20",
@@ -174,40 +177,41 @@ class printUI(wx.Frame):
                 else:
                     timeout = timeout + 1
                     time.sleep(0.001)
-                    if ((timeout > 25) and (rece_len > 0)):
+                    if (timeout > 20):
                         break
 
-        return data,rece_len
+        return data
 
     def ac6530_uart_read(self):
-        data = ''
+        ac6530_data = ''
         timeout = 0
-        rece_len = 0
+        ac6530_rece_len = 0
 
         while True:
             if self.uart_open_flag:
                 n = self.ac6530_ser.inWaiting()
                 if n>0:
-                    data += self.ac6530_ser.read(n)
-                    rece_len += n
+                    ac6530_data += self.ac6530_ser.read(n)
+                    ac6530_rece_len += n
                 else:
                     timeout = timeout + 1
                     time.sleep(0.001)
-                    if ((timeout > 25) and (rece_len > 0)):
+                    if timeout > 20:
                         break
 
-        return data,rece_len
+        return ac6530_data
 
     def write_data_to_file(self,data):
-        s = data
+        s = data+'\r\n'
 
         fp = open("data.txt","a+")
         fp.write(s)
         fp.close()
 
     def data_parsing(self,data):
-        print "recv stm32 data:"
-        print data
+        if len(data)>0:
+            print "recv stm32 data:"
+            print data
 
         if data == 'i':
         #if data.find("FETCH:CURRent:AC?\r\n") != -1:
@@ -216,29 +220,27 @@ class printUI(wx.Frame):
             s = "MEASure:CURRent:AC?\r\n"
             self.ac6530_ser.write(s)
             print "write i"
-            return True
         if data == 'v':
         #elif data.find("FETCH:VOLTage:AC?\r\n") != -1:
             print "come v"
-            self.ac6530_ser.flushOutput()
+            #self.ac6530_ser.flushOutput()
             s = "MEASure:VOLTage:AC?\r\n"
             self.ac6530_ser.write(s)
            # self.ac6530_ser.flush()
             print "write v"
-            return True
         if data == 'p':
         #elif data.find("FETCH:POWer:AC?\r\n") != -1:
             print "come p"
-            self.ac6530_ser.flushOutput()
+            #self.ac6530_ser.flushOutput()
             s = "MEASure:POWer:AC?\r\n"
             self.ac6530_ser.write(s)
           #  self.ac6530_ser.flush()
             print "write p"
-            return True
-        if data[0]!='i' and data[0] != 'v'and data[0] != 'p':
+        if data[0] >= '0' and data[0] <= '9':
             print "data write file\r\n"
             self.write_data_to_file(data)
-            return False
+            #self.Arr_7766.append(data)
+        print 'out\r\n'
 
     def print_to_printer(self):
         try:
@@ -283,28 +285,19 @@ class printUI(wx.Frame):
     '''
 
     def recv_thread_handle(self):
-            ret = 0
-
             while True:
                 try:
-                    (data, data_len) = self.uart_read()
-                    ret = self.data_parsing(data)
-                    if ret==True:
-                        (ac6530_data,ac6530_data_len) = self.ac6530_uart_read()
-                        if(ac6530_data_len>2):
-                            print "ac6530 return data:"
-                            print ac6530_data
-                            self.ser.write(ac6530_data)
-                            print "write to stm32"
+                    data = self.uart_read()
+                    self.data_parsing(data)
+                    ac6530_data = self.ac6530_uart_read()
+                    if(len(ac6530_data)>0):
+                        print "ac6530 return data:"
+                        print ac6530_data
+                        self.ser.write(ac6530_data)
+                        print "write to stm32"
 
-                    (data, data_len) = ('',0)
-                    (ac6530_data, ac6530_data_len) = ('',0)
-
-
-                    #self.ser.write("MEASure:CURRent:AC?\r\n")
-                    #(data, data_len) = self.uart_read()
-                    #print data
-                    time.sleep(0.1)
+                    data = ''
+                    ac6530_data = ''
                 except:
                     pass
 

@@ -69,6 +69,10 @@ double self_adjust_coea_i = 0;
 double self_adjust_coeb_i = 0;
 double self_adjust_coer_i = 0;
 
+double self_adjust_coea_il = 0;
+double self_adjust_coeb_il = 0;
+double self_adjust_coer_il = 0;
+
 double self_adjust_coea_pl_110 = 0;
 double self_adjust_coeb_pl_110 = 0;
 double self_adjust_coer_pl_110 = 0;
@@ -81,7 +85,12 @@ double self_adjust_coea_i_110 = 0;
 double self_adjust_coeb_i_110 = 0;
 double self_adjust_coer_i_110 = 0;
 
+double self_adjust_coea_il_110 = 0;
+double self_adjust_coeb_il_110 = 0;
+double self_adjust_coer_il_110 = 0;
+
 double self_adjust_comv = 0;
+double self_adjust_comv_110 = 0;
 
 double external_adjust_coea_p = 0;
 double external_adjust_coeb_p = 0;
@@ -295,6 +304,7 @@ uint32_t Get_6530_pvi(double *p,double *v,double *i)
 		}
 	}
 
+
 	read_outtime = 0;
 	for(cnt=0;cnt<3;cnt++)
 	{
@@ -433,9 +443,13 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 	ret = Get_origin_pvi(data,len,&p,&v,&i);
 	if(ret==1)
 	{
+		*ret_p = p;
+		*ret_v = v;
+		*ret_i = i;
+#if 1
 		if(*ret_v < 200)
 		{
-			if(*ret_p > 300.f)
+			if(*ret_p > 6.f)
 			{
 				p *= 10;
 				*ret_p = p*self_adjust_coea_ph_110+self_adjust_coeb_ph_110;
@@ -445,11 +459,20 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			{
 				*ret_p = p*self_adjust_coea_pl_110+self_adjust_coeb_pl_110;
 			}
-			*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+			if(*ret_i > 1)
+			{
+				*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+			}
+			else
+			{
+				//*ret_i = i*self_adjust_coea_il_110+self_adjust_coeb_il_110;
+				*ret_i = i*self_adjust_coea_il_110;
+			}
+			*ret_v = v + self_adjust_comv_110;
 		}
 		else
 		{
-			if(*ret_p > 1000)
+			if(*ret_p > 25)
 			{
 				*ret_p = p*self_adjust_coea_ph+self_adjust_coeb_ph;
 			}
@@ -457,11 +480,21 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			{
 				*ret_p = p*self_adjust_coea_pl+self_adjust_coeb_pl;
 			}
-			*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
+			if(*ret_i > 2)
+			{
+				*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
+			}
+			else
+			{
+				//*ret_i = i*self_adjust_coea_il+self_adjust_coeb_il;
+				*ret_i = i*self_adjust_coea_il;
+			}
+			*ret_v = v + self_adjust_comv;
 		}
 
 
-		*ret_v = v + self_adjust_comv;
+
+#endif
 		return 1;
 	}
 
@@ -480,11 +513,15 @@ void Debug_write_coe110_info(void)
 	double ph_b = self_adjust_coeb_ph_110;
 	double ph_r = self_adjust_coer_ph_110;
 
+	double il_a = self_adjust_coea_il_110;
+	double il_b = self_adjust_coeb_il_110;
+	double il_r = self_adjust_coer_il_110;
+
 	double i_a = self_adjust_coea_i_110;
 	double i_b = self_adjust_coeb_i_110;
 	double i_r = self_adjust_coer_i_110;
 
-	double c_v = self_adjust_comv;
+	double c_v = self_adjust_comv_110;
 
 	Debug_usart_write("PL_A_110:",9,INFO_DEBUG);
 	if(p_a>0)
@@ -570,6 +607,63 @@ void Debug_write_coe110_info(void)
 	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
 	//////////////////////////////////////////////////////////////////////////////////
+	Debug_usart_write("IL_A_110:",9,INFO_DEBUG);
+	if(il_a>0)
+	{
+		flodou_to_string(il_a,buf,Get_double_mantissa_len(&il_a),4);
+	}
+	else
+	{
+		il_a = -il_a;
+		flodou_to_string(il_a,buf,Get_double_mantissa_len(&il_a),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("IL_B_110:",9,INFO_DEBUG);
+	if(il_b>0)
+	{
+		flodou_to_string(il_b,buf,Get_double_mantissa_len(&il_b),4);
+	}
+	else
+	{
+		il_b = -il_b;
+		flodou_to_string(il_b,buf,Get_double_mantissa_len(&il_b),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("IL_R_110:",9,INFO_DEBUG);
+	if(il_r>0)
+	{
+		flodou_to_string(i_r,buf,Get_double_mantissa_len(&il_r),4);
+	}
+	else
+	{
+		il_r = -il_r;
+		flodou_to_string(il_r,buf,Get_double_mantissa_len(&il_r),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("C_V_110:",8,INFO_DEBUG);
+	if(c_v>0)
+	{
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+	}
+	else
+	{
+		c_v = -c_v;
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
+
+	//////////////////////////////////////////////////////////////////////////////////
 	Debug_usart_write("I_A_110:",8,INFO_DEBUG);
 	if(i_a>0)
 	{
@@ -638,11 +732,16 @@ void Debug_write_coe_info(void)
 	double ph_b = self_adjust_coeb_ph;
 	double ph_r = self_adjust_coer_ph;
 
+	double il_a = self_adjust_coea_il;
+	double il_b = self_adjust_coeb_il;
+	double il_r = self_adjust_coer_il;
+
 	double i_a = self_adjust_coea_i;
 	double i_b = self_adjust_coeb_i;
 	double i_r = self_adjust_coer_i;
 
 	double c_v = self_adjust_comv;
+	//double cl_v = self_adjust_comv;
 
 	Debug_usart_write("PL_A:",5,INFO_DEBUG);
 	if(p_a>0)
@@ -728,6 +827,63 @@ void Debug_write_coe_info(void)
 	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
 	//////////////////////////////////////////////////////////////////////////////////
+	Debug_usart_write("IL_A:",5,INFO_DEBUG);
+	if(il_a>0)
+	{
+		flodou_to_string(il_a,buf,Get_double_mantissa_len(&il_a),4);
+	}
+	else
+	{
+		il_a = -il_a;
+		flodou_to_string(il_a,buf,Get_double_mantissa_len(&il_a),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("IL_B:",5,INFO_DEBUG);
+	if(il_b>0)
+	{
+		flodou_to_string(il_b,buf,Get_double_mantissa_len(&il_b),4);
+	}
+	else
+	{
+		il_b = -il_b;
+		flodou_to_string(il_b,buf,Get_double_mantissa_len(&il_b),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("IL_R:",5,INFO_DEBUG);
+	if(il_r>0)
+	{
+		flodou_to_string(il_r,buf,Get_double_mantissa_len(&il_r),4);
+	}
+	else
+	{
+		il_r = -il_r;
+		flodou_to_string(il_r,buf,Get_double_mantissa_len(&il_r),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n",2,INFO_DEBUG);
+
+	Debug_usart_write("C_V:",4,INFO_DEBUG);
+	if(c_v>0)
+	{
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+	}
+	else
+	{
+		c_v = -c_v;
+		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
+		Debug_usart_write("-",1,INFO_DEBUG);
+	}
+	Debug_usart_write(buf,6,INFO_DEBUG);
+	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
+
+	//////////////////////////////////////////////////////////////////////////////////
 	Debug_usart_write("I_A:",4,INFO_DEBUG);
 	if(i_a>0)
 	{
@@ -736,7 +892,7 @@ void Debug_write_coe_info(void)
 	else
 	{
 		i_a = -i_a;
-		flodou_to_string(i_a,buf,Get_double_mantissa_len(&i_a),4);
+		flodou_to_string(il_a,buf,Get_double_mantissa_len(&i_a),4);
 		Debug_usart_write("-",1,INFO_DEBUG);
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
@@ -783,6 +939,7 @@ void Debug_write_coe_info(void)
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
+
 }
 
 void key_operate(void)
@@ -821,6 +978,7 @@ void key_operate(void)
 	    		else
 	    			operate_mode = EXTERNAL_ADJUST_MODE;
 #endif
+//	    		relay_test();
 	    	}
 	    }
 		if(operate_mode==0 && RELAY_CONTR_KEY_READ)
@@ -841,67 +999,147 @@ void change_load_size(uint8_t *ch_sta,uint32_t load_size)
 {
 #if 1
 	if(load_size==1)
-					ch_sta[0] = 1;
-	else if(load_size==3)
-	{
-		ch_sta[1] = 1;;
-	}
-	else if(load_size==6)
-	{
-		ch_sta[2] = 1;ch_sta[1] = 1;
-	}
-	else if(load_size==12)
-	{
-		ch_sta[3] = 1;
-	}
-	else if(load_size==20)
-	{
-		ch_sta[3] = 1;ch_sta[2] = 1;ch_sta[1] = 1;ch_sta[0] = 1;
-	}
-	else if(load_size==50)
-	{
-		ch_sta[4] = 1;
-	}
-	else if(load_size==70)
-	{
-		ch_sta[4] = 1;ch_sta[3] = 1;ch_sta[2] = 1;ch_sta[1] = 1;ch_sta[0] = 1;
-	}
-	else if(load_size==100)
-	{
-		ch_sta[4] = 1;ch_sta[5] = 1;
-	}
-	else if(load_size==170)
-	{
-		ch_sta[5] = 1;ch_sta[4] = 1;ch_sta[3] = 1;ch_sta[2] = 1;ch_sta[1] = 1;ch_sta[0] = 1;
-	}
-	else if(load_size==500)
-	{
-		ch_sta[6] = 1;
-	}
-	else if(load_size==600)
-	{
-		ch_sta[6] = 1;ch_sta[5] = 1;ch_sta[4] = 1;
-	}
-	else if(load_size==1000)
-	{
-		ch_sta[6] = 1;ch_sta[7] = 1;
-	}
-	else if(load_size==1500)
-	{
-		ch_sta[6] = 1;ch_sta[7] = 1;ch_sta[8] = 1;
-	}
-	else if(load_size==2000)
-	{
-		ch_sta[6] = 1;ch_sta[7] = 1;ch_sta[8] = 1;ch_sta[9] = 1;
-	}
-	else if(load_size==2500)
-	{
-		ch_sta[6] = 1;ch_sta[7] = 1;ch_sta[8] = 1;ch_sta[9] = 1;ch_sta[10] = 1;
-	}
-	else if(load_size==3000)
-	{
-		ch_sta[6] = 1;ch_sta[7] = 1;ch_sta[8] = 1;ch_sta[9] = 1;ch_sta[10] = 1;ch_sta[11] = 1;
-	}
+			ch_sta[0] = 1;
+		else if(load_size==3)
+		{
+			ch_sta[1] = 1;;
+		}
+		else if(load_size==4)
+		{
+			ch_sta[0] = 1;ch_sta[1] = 1;
+		}
+		else if(load_size==6)
+		{
+			ch_sta[0] = 1;ch_sta[2] = 1;
+		}
+		else if(load_size==8)
+		{
+			ch_sta[1] = 1;ch_sta[2] = 1;
+		}
+		else if(load_size==10)
+		{
+			ch_sta[3] = 1;
+		}
+		else if(load_size==11)
+		{
+			ch_sta[0] = 1;ch_sta[3] = 1;
+		}
+		else if(load_size==13)
+		{
+			ch_sta[1] = 1;ch_sta[3] = 1;
+		}
+		else if(load_size==14)
+		{
+			ch_sta[0] = 1;ch_sta[1] = 1;ch_sta[3] = 1;
+		}
+		else if(load_size==15)
+		{
+			ch_sta[3] = 1;ch_sta[2] = 1;
+		}
+		else if(load_size==16)
+		{
+			ch_sta[0] = 1;ch_sta[2] = 1;ch_sta[3] = 1;
+		}
+		else if(load_size==18)
+		{
+			ch_sta[1] = 1;ch_sta[2] = 1;ch_sta[3] = 1;
+		}
+		else if(load_size==20)
+		{
+			ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==21)
+		{
+			ch_sta[0] = 1;ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==23)
+		{
+			ch_sta[1] = 1;ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==25)
+		{
+			ch_sta[3] = 1;ch_sta[2] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==26)
+		{
+			ch_sta[0] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==28)
+		{
+			ch_sta[1] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==30)
+		{
+			ch_sta[5] = 1;ch_sta[3] = 1;ch_sta[4] = 1;
+		}
+		else if(load_size==31)
+		{
+			ch_sta[0] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==33)
+		{
+			ch_sta[1] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==34)
+		{
+			ch_sta[0] = 1;ch_sta[1] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==36)
+		{
+			ch_sta[0] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==38)
+		{
+			ch_sta[1] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==39)
+		{
+			ch_sta[0] = 1;ch_sta[1] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;
+		}
+		else if(load_size==50)
+		{
+			ch_sta[6] = 1;
+		}
+		else if(load_size==60)
+		{
+			ch_sta[3] = 1;ch_sta[6] = 1;
+		}
+		else if(load_size==70)
+		{
+			ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[6] = 1;
+		}
+		else if(load_size==80)
+		{
+			ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;ch_sta[6] = 1;
+		}
+		else if(load_size==100)
+		{
+			ch_sta[6] = 1;ch_sta[7] = 1;
+		}
+		else if(load_size==130)
+		{
+			ch_sta[5] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[6] = 1;ch_sta[7] = 1;
+		}
+		else if(load_size==139)
+		{
+			ch_sta[0] = 1;ch_sta[1] = 1;ch_sta[2] = 1;ch_sta[3] = 1;ch_sta[4] = 1;ch_sta[5] = 1;ch_sta[6] = 1;ch_sta[7] = 1;
+		}
+		else if(load_size==500)
+		{
+			ch_sta[8] = 1;
+		}
+		else if(load_size==1000)
+		{
+			ch_sta[8] = 1;ch_sta[9] = 1;
+		}
+		else if(load_size==1500)
+		{
+			ch_sta[8] = 1;ch_sta[9] = 1;ch_sta[10] = 1;
+		}
+		else if(load_size==2000)
+		{
+			ch_sta[8] = 1;ch_sta[9] = 1;ch_sta[10] = 1;ch_sta[11] = 1;
+		}
 #endif
 
 }
@@ -1052,22 +1290,35 @@ uint32_t Get_computer_external_pvi(uint8_t *data,uint32_t len,double *p,double *
 	return 1;
 }
 
-void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i_b,double v_coe)
+void Send_result_to_c76(uint8_t result,double pl_a,double pl_b,double il_a,double il_b,double vl_coe,
+						double p_a,double p_b,double i_a,double i_b,double v_coe)
 {
-	uint8_t send_data[50] = {"AT+C76END=0,"};
+	uint8_t send_data[100] = {"AT+C76END=0,"};
 	uint8_t p_a_buf[10] = {0};
 	uint8_t p_b_buf[10] = {0};
 	uint8_t i_a_buf[10] = {0};
 	uint8_t i_b_buf[10] = {0};
 	uint8_t v_coe_buf[10] = {0};
 
+	uint8_t ph_a_buf[10] = {0};
+	uint8_t ph_b_buf[10] = {0};
+	uint8_t ih_a_buf[10] = {0};
+	uint8_t ih_b_buf[10] = {0};
+	uint8_t vh_coe_buf[10] = {0};
+
 	uint8_t test_buf[10] = {0};
 
-	double p_a_tmp = p_a;
-	double p_b_tmp = p_b;
-	double i_a_tmp = i_a;
-	double i_b_tmp = i_b;
-	double v_coe_tmp = v_coe;
+	double p_a_tmp = pl_a;
+	double p_b_tmp = pl_b;
+	double i_a_tmp = il_a;
+	double i_b_tmp = il_b;
+	double v_coe_tmp = vl_coe;
+
+	double ph_a_tmp = p_a;
+	double ph_b_tmp = p_b;
+	double ih_a_tmp = i_a;
+	double ih_b_tmp = i_b;
+	double vh_coe_tmp = v_coe;
 
 	if(result==1)
 	{
@@ -1079,17 +1330,27 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	}
 
 	if(p_a_tmp<0)
-			p_a_tmp = -p_a;
+			p_a_tmp = -pl_a;
 	if(p_b_tmp<0)
-			p_b_tmp = -p_b;
+			p_b_tmp = -pl_b;
 	if(i_a_tmp<0)
-			i_a_tmp = -i_a;
+			i_a_tmp = -il_a;
 	if(i_b_tmp<0)
-			i_b_tmp = -i_b;
+			i_b_tmp = -il_b;
 	if(v_coe_tmp<0)
-			v_coe_tmp = -v_coe;
+			v_coe_tmp = -vl_coe;
+	if(ph_a_tmp<0)
+			ph_a_tmp = -p_a;
+	if(ph_b_tmp<0)
+			ph_b_tmp = -p_b;
+	if(ih_a_tmp<0)
+			ih_a_tmp = -i_a;
+	if(ih_b_tmp<0)
+			ih_b_tmp = -i_b;
+	if(vh_coe_tmp<0)
+			vh_coe_tmp = -v_coe;
 #if 1
-	if(p_a < 0)
+	if(pl_a < 0)
 	{
 		Debug_usart_write("-",1,TEST_DEBUG);
 	}
@@ -1097,7 +1358,7 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	Debug_usart_write(test_buf,9,TEST_DEBUG);
 	Debug_usart_write("\r\n",2,TEST_DEBUG);
 
-	if(p_b < 0)
+	if(pl_b < 0)
 	{
 			Debug_usart_write("-",1,TEST_DEBUG);
 	}
@@ -1105,7 +1366,7 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	Debug_usart_write(test_buf,9,TEST_DEBUG);
 	Debug_usart_write("\r\n",2,TEST_DEBUG);
 
-	if(i_a < 0)
+	if(il_a < 0)
 	{
 		Debug_usart_write("-",1,TEST_DEBUG);
 	}
@@ -1113,11 +1374,43 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	Debug_usart_write(test_buf,9,TEST_DEBUG);
 	Debug_usart_write("\r\n",2,TEST_DEBUG);
 
-	if(i_b < 0)
+	if(il_b < 0)
 	{
 		Debug_usart_write("-",1,TEST_DEBUG);
 	}
 	flodou_to_string(i_b_tmp,test_buf,Get_double_mantissa_len(&i_b_tmp),3);
+	Debug_usart_write(test_buf,9,TEST_DEBUG);
+	Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+	if(p_a < 0)
+	{
+		Debug_usart_write("-",1,TEST_DEBUG);
+	}
+	flodou_to_string(ph_a_tmp,test_buf,Get_double_mantissa_len(&ph_a_tmp),3);
+	Debug_usart_write(test_buf,9,TEST_DEBUG);
+	Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+	if(p_b < 0)
+	{
+			Debug_usart_write("-",1,TEST_DEBUG);
+	}
+	flodou_to_string(ph_b_tmp,test_buf,Get_double_mantissa_len(&ph_b_tmp),3);
+	Debug_usart_write(test_buf,9,TEST_DEBUG);
+	Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+	if(i_a < 0)
+	{
+		Debug_usart_write("-",1,TEST_DEBUG);
+	}
+	flodou_to_string(ih_a_tmp,test_buf,Get_double_mantissa_len(&ih_a_tmp),3);
+	Debug_usart_write(test_buf,9,TEST_DEBUG);
+	Debug_usart_write("\r\n",2,TEST_DEBUG);
+
+	if(i_b < 0)
+	{
+		Debug_usart_write("-",1,TEST_DEBUG);
+	}
+	flodou_to_string(ih_b_tmp,test_buf,Get_double_mantissa_len(&ih_b_tmp),3);
 	Debug_usart_write(test_buf,9,TEST_DEBUG);
 	Debug_usart_write("\r\n",2,TEST_DEBUG);
 #endif
@@ -1126,6 +1419,12 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	i_a_tmp *= 1000;
 	i_b_tmp *= 1000;
 	v_coe_tmp *= 1000;
+
+	ph_a_tmp *= 1000;
+	ph_b_tmp *= 1000;
+	ih_a_tmp *= 1000;
+	ih_b_tmp *= 1000;
+	vh_coe_tmp *= 1000;
 
 	if(((uint32_t)p_a_tmp)%10 > 5)
 		p_a_tmp += 10;
@@ -1138,11 +1437,28 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	if(((uint32_t)v_coe_tmp)%10 > 5)
 		v_coe_tmp += 10;
 
+	if(((uint32_t)ph_a_tmp)%10 > 5)
+		ph_a_tmp += 10;
+	if(((uint32_t)ph_b_tmp)%10 > 5)
+		ph_b_tmp += 10;
+	if(((uint32_t)ih_a_tmp)%10 > 5)
+		ih_a_tmp += 10;
+	if(((uint32_t)ih_b_tmp)%10 > 5)
+		ih_b_tmp += 10;
+	if(((uint32_t)vh_coe_tmp)%10 > 5)
+		vh_coe_tmp += 10;
+
 	p_a_tmp /= 10;
 	p_b_tmp /= 10;
 	i_a_tmp /= 10;
 	i_b_tmp /= 10;
 	v_coe_tmp /= 10;
+
+	ph_a_tmp /= 10;
+	ph_b_tmp /= 10;
+	ih_a_tmp /= 10;
+	ih_b_tmp /= 10;
+	vh_coe_tmp /= 10;
 
 	//Itoa((uint32_t)p_a_tmp,p_a_buf);
 	//Itoa((uint32_t)p_b_tmp,p_b_buf);
@@ -1155,39 +1471,81 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	flodou_to_string(i_b_tmp,i_b_buf,Get_double_mantissa_len(&i_b_tmp),0);
 	flodou_to_string(v_coe_tmp,v_coe_buf,Get_double_mantissa_len(&v_coe_tmp),0);
 
-	if(p_a < 0)
+	flodou_to_string(ph_a_tmp,ph_a_buf,Get_double_mantissa_len(&ph_a_tmp),0);
+	flodou_to_string(ph_b_tmp,ph_b_buf,Get_double_mantissa_len(&ph_b_tmp),0);
+	flodou_to_string(ih_a_tmp,ih_a_buf,Get_double_mantissa_len(&ih_a_tmp),0);
+	flodou_to_string(ih_b_tmp,ih_b_buf,Get_double_mantissa_len(&ih_b_tmp),0);
+	flodou_to_string(vh_coe_tmp,vh_coe_buf,Get_double_mantissa_len(&vh_coe_tmp),0);
+
+	if(pl_a < 0)
 	{
 		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
 	}
 	str_cat(send_data,str_len(send_data),p_a_buf,str_len(p_a_buf));
 	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
 
-	if(p_b < 0)
+	if(pl_b < 0)
 	{
 			str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
 	}
 	str_cat(send_data,str_len(send_data),p_b_buf,str_len(p_b_buf));
 	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
 
-	if(i_a < 0)
+	if(il_a < 0)
 	{
 		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
 	}
 	str_cat(send_data,str_len(send_data),i_a_buf,str_len(i_a_buf));
 	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
 
-	if(i_b < 0)
+	if(il_b < 0)
 	{
 		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
 	}
 	str_cat(send_data,str_len(send_data),i_b_buf,str_len(i_b_buf));
 	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
 
-	if(v_coe < 0)
+	if(vl_coe < 0)
 	{
 		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
 	}
 	str_cat(send_data,str_len(send_data),v_coe_buf,str_len(v_coe_buf));
+	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
+
+	if(p_a < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
+	str_cat(send_data,str_len(send_data),ph_a_buf,str_len(ph_a_buf));
+	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
+
+	if(p_b < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
+	str_cat(send_data,str_len(send_data),ph_b_buf,str_len(ph_b_buf));
+	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
+
+	if(i_a < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
+	str_cat(send_data,str_len(send_data),ih_a_buf,str_len(ih_a_buf));
+	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
+
+	if(i_b < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
+	str_cat(send_data,str_len(send_data),ih_b_buf,str_len(ih_b_buf));
+	str_cat(send_data,str_len(send_data),(uint8_t *)",",(uint32_t)1);
+
+	if(v_coe < 0)
+	{
+		str_cat(send_data,str_len(send_data),(uint8_t *)"-",(uint32_t)1);
+	}
+	str_cat(send_data,str_len(send_data),vh_coe_buf,str_len(vh_coe_buf));
+
 
 	if(result==1)
 	{
@@ -1196,25 +1554,28 @@ void Send_result_to_c76(uint8_t result,double p_a,double p_b,double i_a,double i
 	}
 
 	Debug_usart_write(send_data,str_len(send_data),'Y');
+	Debug_usart_write("\r\n",2,'Y');
 }
 
 int32_t Go_self_adjust(void)
 {
 	uint8_t ch_sta[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1 2 3 4 5 6 7 8 9 10 60 60 600 600 600 600 600 600
 	//uint32_t load_size[28] = {1,2,3,4,5,6,7,8,9,10,15,60,120,600,660,720,1200,1260,1320,1800,1860,1920,2400,2460,2520,3000,3060,3160};
-	uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
+	//uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
 	//uint32_t load_size[12] = {3,12,20,50,70,100,170,500,600,1000,1500,2000};
-	//uint32_t load_size[8] = {1,6,20,70,100,500,600,1000};
-	//uint32_t load_size[1] = {1};
-	uint32_t load_cnt = 16;
+	uint32_t load_size[35] = {1,3,4,6,8,10,11,13,14,15,16,18,20,21,23,25,26,28,30,33,34,36,38,
+								  39,50,60,70,80,100,130,139,500,1000,1500,2000};
+	uint32_t load_cnt = 35;
 	uint8_t i = 0,j = 0,z = 0,k = 0;
+	uint8_t p_cnt = 0,v_cnt = 0,i_cnt = 0;
 	uint32_t m = 0;
 	uint8_t ret = 0;
 	uint8_t data[240] = {0};
 	uint8_t cnt_buf[2] = {0};
 	uint8_t c = 0;
 
-	uint8_t test_buf[20] = {0};
+	uint8_t test_buf[10] = {0};
+	uint8_t send_data[150] = {0};
 	uint8_t read_count = 0;
 
 	double coea_pl = 0;
@@ -1229,13 +1590,25 @@ int32_t Go_self_adjust(void)
 	double coeb_i = 0;
 	double coer_i = 0;
 
-	double p_7766[28] = {0};
-	double v_7766[28] = {0};
-	double i_7766[28] = {0};
+	double coea_il = 0;
+	double coeb_il = 0;
+	double coer_il = 0;
 
-	double p_6530[28] = {0};
-	double v_6530[28] = {0};
-	double i_6530[28] = {0};
+	double p_7766[36] = {0};
+	double v_7766[36] = {0};
+	double i_7766[36] = {0};
+
+	double pp_7766[36] = {0};
+	double vv_7766[36] = {0};
+	double ii_7766[36] = {0};
+
+	double p_6530[36] = {0};
+	double v_6530[36] = {0};
+	double i_6530[36] = {0};
+
+	double pp_6530[36] = {0};
+	double vv_6530[36] = {0};
+	double ii_6530[36] = {0};
 
 	double p_tmp_6530[10] = {0};
 	double v_tmp_6530[10] = {0};
@@ -1287,9 +1660,9 @@ int32_t Go_self_adjust(void)
 				}
 				else
 				{
-					p_tmp_6530[j/4] = 0;
-					v_tmp_6530[j/4] = 0;
-					i_tmp_6530[j/4] = 0;
+					p_tmp_6530[j] = 0;
+					v_tmp_6530[j] = 0;
+					i_tmp_6530[j] = 0;
 				}
 				Debug_usart_write("read 6530 over\r\n",16,INFO_DEBUG);
 			}
@@ -1320,9 +1693,10 @@ int32_t Go_self_adjust(void)
 						read_count++;
 						if(read_count >= 10)
 						{
-							memset(ch_sta,0x00, sizeof(ch_sta));
-							operate_ch_relay(ch_sta);
-							return -3;
+							//memset(ch_sta,0x00, sizeof(ch_sta));
+							//operate_ch_relay(ch_sta);
+							//return -3;
+							break;
 						}
 						count_time_flag = 0;
 					}
@@ -1332,6 +1706,10 @@ int32_t Go_self_adjust(void)
 					if(ret==1)
 					{
 						break;
+					}
+					else
+					{
+						memset(&data[24*j],0x00,24);
 					}
 				}
 			}
@@ -1371,9 +1749,12 @@ int32_t Go_self_adjust(void)
 		i_6530[i] /= k;
 
 		flodou_to_string(p_6530[i],test_buf,5,4);
+#if 1
 		Debug_usart_write(test_buf,9,TEST_DEBUG);
 		Debug_usart_write("\r\n",2,TEST_DEBUG);
 
+
+#endif
 
 		for(j=0;j<10;j++)
 		{
@@ -1388,12 +1769,12 @@ int32_t Go_self_adjust(void)
 				i_tmp_7766[j] = 0;
 			}
 		}
-		if(z==0)
-		{
-			memset(ch_sta,0x00, sizeof(ch_sta));
-			operate_ch_relay(ch_sta);
-			return -2;
-		}
+		//if(z==0)
+		//{
+			//memset(ch_sta,0x00, sizeof(ch_sta));
+			//operate_ch_relay(ch_sta);
+			//return -2;
+		//}
 		for(j=0;j<10;j++)
 		{
 			p_7766[i] += p_tmp_7766[j];
@@ -1410,40 +1791,97 @@ int32_t Go_self_adjust(void)
 		i_7766[i] /= z;
 
 		flodou_to_string(p_7766[i],test_buf,5,4);
-		Debug_usart_write(test_buf,9,TEST_DEBUG);
+		Debug_usart_write(test_buf,10,TEST_DEBUG);
 		Debug_usart_write("\r\n\r\n",4,TEST_DEBUG);
-
-		if(8*i < 100)
+#if 1
+		flodou_to_string(p_6530[i],test_buf,5,4);
+		if(i==0)
 		{
-			lcd_change_percent_info(8*i);
+			str_cat(send_data,str_len(send_data),"\r\n",2);
+		}
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\t",1);
+		flodou_to_string(v_6530[i],test_buf,5,4);
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\t",1);
+		flodou_to_string(i_6530[i],test_buf,5,4);
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\t",1);
+
+		flodou_to_string(p_7766[i],test_buf,5,4);
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\t",1);
+		flodou_to_string(v_7766[i],test_buf,5,4);
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\t",1);
+		flodou_to_string(i_7766[i],test_buf,5,4);
+		str_cat(send_data,str_len(send_data),test_buf,str_len(test_buf));
+		str_cat(send_data,str_len(send_data),"\r\n",2);
+
+		External_usart_write(send_data,str_len(send_data));
+		memset(send_data,0x00, sizeof(send_data));
+#endif
+		if(3*i < 100)
+		{
+			lcd_change_percent_info(i*3);
 		}
 	}
-	c = i + '0';
-	Debug_usart_write(&c,1,INFO_DEBUG);
+	//c = i + '0';
+	//Debug_usart_write(&c,1,INFO_DEBUG);
 	lcd_change_percent_info(100);
-	Get_coe_a_b_r(p_7766,p_6530,12,&coea_pl,&coeb_pl,&coer_pl);
-	Get_coe_a_b_r(&p_7766[12],&p_6530[12],4,&coea_ph,&coeb_ph,&coer_ph);
-	Get_coe_a_b_r(i_7766,i_6530,16,&coea_i,&coeb_i,&coer_i);
 
-	for(j=0;j<16;j++)
+	k = 0;
+	for(j=0;j<load_cnt;j++)
 	{
 		if((v_6530[j] > 0.0001) && (v_7766[j] > 0.0001))
 		{
-			ac6530_com_v += v_6530[j];
-			self_com_v += v_7766[j];
-			k++;
+			if(v_7766[j] > (v_6530[j]*0.7) && v_7766[j] < (v_6530[j]*1.3))
+			{
+				ac6530_com_v += v_6530[j];
+				self_com_v += v_7766[j];
+				k++;
+			}
 		}
 	}
 
 	ac6530_com_v /= k;
 	self_com_v /= k;
 
-	self_adjust_comv = ac6530_com_v - self_com_v;
-
-	if((coer_pl > 0.9) && (coer_i > 0.9) && (coer_ph > 0.9))
+	for(m=0;m<load_cnt;m++)
 	{
-		if(self_com_v > 200)
+		if(p_6530[m] > 0.0001 && p_7766[m] > 0.0001)
 		{
+			if((p_7766[m] > (p_6530[m]*0.7)) && (p_7766[m] < (p_6530[m]*1.3)))
+			{
+				pp_6530[p_cnt] = p_6530[m];
+				pp_7766[p_cnt] = p_7766[m];
+				p_cnt++;
+			}
+		}
+		if(i_6530[m] > 0.0001 && i_7766[m] > 0.0001)
+		{
+			if((i_7766[m] > (i_6530[m]*0.7)) && (i_7766[m] < (i_6530[m]*1.3)))
+			{
+				ii_6530[p_cnt] = i_6530[m];
+				ii_7766[p_cnt] = i_7766[m];
+				i_cnt++;
+			}
+		}
+	}
+
+
+	Get_coe_a_b_r(p_7766,pp_6530,16,&coea_pl,&coeb_pl,&coer_pl);
+	Get_coe_a_b_r(p_7766,pp_6530,p_cnt,&coea_ph,&coeb_ph,&coer_ph);
+	Get_coe_a_b_r(i_7766,i_6530,31,&coea_il,&coeb_il,&coer_il);
+	Get_coe_a_b_r(&i_7766[32],&i_6530[32],4,&coea_i,&coeb_i,&coer_i);
+
+	if((coer_pl > 0.9) && (coer_i > 0.9) && (coer_ph > 0.9) && (coer_il > 0.9) )
+	{
+		if(ac6530_com_v > 200)
+		{
+			Debug_usart_write("write220 flash\r\n",16,TEST_DEBUG);
+#if 1
+			self_adjust_comv = ac6530_com_v - self_com_v;
 			self_adjust_coea_pl = coea_pl;
 			self_adjust_coeb_pl = coeb_pl;
 			self_adjust_coer_pl = coer_pl;
@@ -1455,10 +1893,18 @@ int32_t Go_self_adjust(void)
 			self_adjust_coea_i = coea_i;
 			self_adjust_coeb_i = coeb_i;
 			self_adjust_coer_i = coer_i;
+
+			self_adjust_coea_il = coea_il;
+			self_adjust_coeb_il = coeb_il;
+			self_adjust_coer_il = coer_il;
 			write_coe_from_flash(V_220);
+#endif
 		}
 		else
 		{
+			Debug_usart_write("write110 flash\r\n",16,TEST_DEBUG);
+#if 1
+			self_adjust_comv_110 = ac6530_com_v - self_com_v;
 			self_adjust_coea_pl_110 = coea_pl;
 			self_adjust_coeb_pl_110 = coeb_pl;
 			self_adjust_coer_pl_110 = coer_pl;
@@ -1470,7 +1916,12 @@ int32_t Go_self_adjust(void)
 			self_adjust_coea_i_110 = coea_i;
 			self_adjust_coeb_i_110 = coeb_i;
 			self_adjust_coer_i_110 = coer_i;
+
+			self_adjust_coea_il_110 = coea_il;
+			self_adjust_coeb_il_110 = coeb_il;
+			self_adjust_coer_il_110 = coer_il;
 			write_coe_from_flash(V_110);
+#endif
 		}
 
 
@@ -1495,9 +1946,9 @@ int32_t Go_external_adjust(void)
 
 	uint8_t ch_sta[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1 2 3 4 5 6 7 8 9 10 60 60 600 600 600 600 600 600
 	//uint32_t load_size[28] = {1,2,3,4,5,6,7,8,9,10,15,60,120,600,660,720,1200,1260,1320,1800,1860,1920,2400,2460,2520,3000,3060,3160};
-	uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
-	//uint32_t load_size[12] = {1,3,6,12,20,50,70,100,170,500,600,1000};
-	uint32_t load_cnt = 16;
+	//uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
+	uint32_t load_size[18] = {1,3,6,10,13,16,20,25,30,36,39,50,70,100,500,1000,1500,2000};
+	uint32_t load_cnt = 18;
 	uint8_t read_count = 0;
 	uint8_t read_c76_count = 0;
 	uint8_t err_cnt = 0;
@@ -1518,25 +1969,33 @@ int32_t Go_external_adjust(void)
 	double ex_coeb_p = 0;
 	double ex_coer_p = 0;
 
+	double ex_coea_pl = 0;
+	double ex_coeb_pl = 0;
+	double ex_coer_pl = 0;
+
 	double ex_coea_i = 0;
 	double ex_coeb_i = 0;
 	double ex_coer_i = 0;
 
-	double self_p[28] = {0};
-	double self_v[28] = {0};
-	double self_i[28] = {0};
+	double ex_coea_il = 0;
+	double ex_coeb_il = 0;
+	double ex_coer_il = 0;
 
-	double self_pp[28] = {0};
+	double self_p[36] = {0};
+	double self_v[36] = {0};
+	double self_i[36] = {0};
+
+	double self_pp[36] = {0};
 	//double self_vv[28] = {0};
-	double self_ii[28] = {0};
+	double self_ii[36] = {0};
 
-	double exter_p[28] = {0};
-	double exter_v[28] = {0};
-	double exter_i[28] = {0};
+	double exter_p[36] = {0};
+	double exter_v[36] = {0};
+	double exter_i[36] = {0};
 
-	double exter_pp[28] = {0};
-	double exter_vv[28] = {0};
-	double exter_ii[28] = {0};
+	double exter_pp[36] = {0};
+	double exter_vv[36] = {0};
+	double exter_ii[36] = {0};
 
 	double self_p_tmp[10] = {0};
 	double self_v_tmp[10] = {0};
@@ -1691,45 +2150,6 @@ int32_t Go_external_adjust(void)
 
 			while(1)
 			{
-#if 0
-				if(load_size[i] > 0)
-				{
-					read_count = 0;
-					while(1)
-					{
-						if(count_time_flag==1)
-						{
-								read_count++;
-								if(read_count >= 10)
-								{
-									//memset(ch_sta,0x00, sizeof(ch_sta));
-									//operate_ch_relay(ch_sta);
-									Debug_usart_write("read 7766 error\r\n",17,INFO_DEBUG);
-									return -1;
-								}
-								count_time_flag = 0;
-						}
-						pool_recv_one_command(&cse7766rx,&self_buf[24*j],24,CSE_7766_POOL);
-						ret = Check_data_is_error(&self_buf[24*j],24);
-						if(ret==1)
-						{
-							j++;
-							if(j==5)
-							{
-								break;
-							}
-							count_time_flag = 0;
-						}
-						else
-						{
-							if(self_buf[24*j]!=0)
-							{
-								memset(&self_buf[24*j],0x00,24);
-							}
-						}
-					}
-				}
-#endif
 				for(j=0;j<5;j++)
 				{
 					if(load_size[i]>0)
@@ -1832,7 +2252,8 @@ int32_t Go_external_adjust(void)
 
 			if(self_v[i] < 200)
 			{
-				if(self_p[i] > 300.f)
+				self_v[i] += self_adjust_comv_110;
+				if(self_p[i] > 6)
 				{
 					self_p[i] *= 10;
 					self_p[i] = self_p[i]*self_adjust_coea_ph_110+self_adjust_coeb_ph_110;
@@ -1842,11 +2263,20 @@ int32_t Go_external_adjust(void)
 				{
 					self_p[i] = self_p[i]*self_adjust_coea_pl_110+self_adjust_coeb_pl_110;
 				}
-				self_i[i] = self_i[i]*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+				if(self_i[i] > 1)
+				{
+					self_i[i] = self_i[i]*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+				}
+				else
+				{
+					//self_i[i] = self_i[i]*self_adjust_coea_il_110+self_adjust_coeb_il_110;
+					self_i[i] = self_i[i]*self_adjust_coea_il_110;
+				}
 			}
 			else
 			{
-				if(self_p[i] > 1000)
+				self_v[i] += self_adjust_comv;
+				if(self_p[i] > 25)
 				{
 					self_p[i] = self_p[i]*self_adjust_coea_ph+self_adjust_coeb_ph;
 				}
@@ -1854,11 +2284,18 @@ int32_t Go_external_adjust(void)
 				{
 					self_p[i] = self_p[i]*self_adjust_coea_pl+self_adjust_coeb_pl;
 				}
-				self_i[i] = self_i[i]*self_adjust_coea_i+self_adjust_coeb_i;
+				if(self_i[i] > 2)
+				{
+					self_i[i] = self_i[i]*self_adjust_coea_i+self_adjust_coeb_i;
+				}
+				else
+				{
+					//self_i[i] = self_i[i]*self_adjust_coea_il+self_adjust_coeb_il;
+					self_i[i] = self_i[i]*self_adjust_coea_il;
+				}
 			}
 
 
-			self_v[i] += self_adjust_comv;
 
 			flodou_to_string(self_p[i],test_buf,4,4);
 			Debug_usart_write(test_buf,9,TEST_DEBUG);
@@ -1874,7 +2311,7 @@ int32_t Go_external_adjust(void)
 			Debug_usart_write("\r\n\r\n",4,TEST_DEBUG);
 
 
-			lcd_change_percent_info(6*i);
+			lcd_change_percent_info(3*i);
 		}
 
 		lcd_change_percent_info(100);
@@ -1885,21 +2322,30 @@ int32_t Go_external_adjust(void)
 		{
 			if(exter_p[m] > 0.0001 && self_p[m] > 0.0001)
 			{
-				exter_pp[p_cnt] = exter_p[m];
-				self_pp[p_cnt] = self_p[m];
-				p_cnt++;
+				if((self_p[m] > exter_p[m]*0.7) && (self_p[m] < exter_p[m]*1.3))
+				{
+					exter_pp[p_cnt] = exter_p[m];
+					self_pp[p_cnt] = self_p[m];
+					p_cnt++;
+				}
 			}
 			if(exter_i[m] > 0.0001 && self_i[m] > 0.0001)
 			{
-				exter_ii[i_cnt] = exter_i[m];
-				self_ii[i_cnt] = self_i[m];
-				i_cnt++;
+				if((self_i[m] > exter_i[m]*0.7) && (self_i[m] < exter_i[m]*1.3))
+				{
+					exter_ii[i_cnt] = exter_i[m];
+					self_ii[i_cnt] = self_i[m];
+					i_cnt++;
+				}
 			}
 			if(self_v[m] > 0.0001 && exter_v[m] > 0.0001)
 			{
-				k++;
-				exter_com_v += exter_v[m];
-				self_com_v += self_v[m];
+				if((self_v[m] > exter_v[m]*0.7) && (self_v[m] < exter_v[m]*1.3))
+				{
+					k++;
+					exter_com_v += exter_v[m];
+					self_com_v += self_v[m];
+				}
 			}
 		}
 
@@ -1939,33 +2385,41 @@ int32_t Go_external_adjust(void)
 		self_com_v /= k;
 		external_adjust_comv = self_com_v - exter_com_v;
 
+		Get_coe_a_b_r(exter_pp,self_pp,8,&ex_coea_pl,&ex_coeb_pl,&ex_coer_pl);
 		Get_coe_a_b_r(exter_pp,self_pp,p_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
-		Get_coe_a_b_r(exter_ii,self_ii,i_cnt,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
+		Get_coe_a_b_r(exter_ii,self_ii,14,&ex_coea_il,&ex_coeb_il,&ex_coer_il);
+		Get_coe_a_b_r(&exter_ii[15],&self_ii[15],4,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
 
-		if((ex_coer_p > 0.9) && (ex_coer_i > 0.9))
+		ex_coeb_i = 0;
+
+		if((ex_coer_p > 0.9) && (ex_coer_i > 0.9) && (ex_coer_pl > 0.9) && (ex_coer_il > 0.9))
 		{
 			if((ex_coea_p > 0.7 && ex_coea_p < 1.5) && (ex_coea_i > 0.7 && ex_coea_i < 1.5))
 			{
 				if((ex_coeb_p > -2 && ex_coeb_p < 2) && (ex_coeb_i > -0.05 && ex_coeb_i < 0.05))
 				{
-					Send_result_to_c76(1,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+					Send_result_to_c76(1,ex_coea_pl,ex_coeb_pl,ex_coea_il,ex_coeb_il,external_adjust_comv,
+										ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 					ret = 1;
 				}
 				else
 				{
-					Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+					Send_result_to_c76(0,ex_coea_pl,ex_coeb_pl,ex_coea_il,ex_coeb_il,external_adjust_comv,
+										ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 					ret = 0;
 				}
 			}
 			else
 			{
-				Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+				Send_result_to_c76(0,ex_coea_pl,ex_coeb_pl,ex_coea_il,ex_coeb_il,external_adjust_comv,
+									ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 				ret = 0;
 			}
 		}
 		else
 		{
-			Send_result_to_c76(0,ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
+			Send_result_to_c76(0,ex_coea_pl,ex_coeb_pl,ex_coea_il,ex_coeb_il,external_adjust_comv,
+								ex_coea_p,ex_coeb_p,ex_coea_i,ex_coeb_i,external_adjust_comv);
 			ret = 0;
 		}
 
@@ -2060,20 +2514,24 @@ void Check_c76_fac(void)
 void relay_test(void)
 {
 	static uint8_t i = 0;
+	uint8_t buf[50] = {0};
+	uint32_t len = 0;
 	uint8_t ch_sta[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	uint32_t load_size[16] = {1,3,6,12,20,50,70,100,170,500,600,1000,1500,2000,2500,3000};
+	uint32_t load_size[36] = {1,3,4,6,8,10,11,13,14,15,16,18,20,21,23,25,26,28,30,33,34,36,38,
+								  39,50,60,70,80,100,130,139,500,1000,1500,2000};
 #if 1
 	change_load_size(ch_sta,load_size[i]);
 	operate_ch_relay(ch_sta);
 	i++;
-	if(i==16)
+	if(i==36)
 	{
 		i = 0;
 	}
-	//AC6530_usart_write((uint8_t *)"MEASure:CURRent:AC?\r\n",21);
-	//i_len = pool_recv_one_command(&ac6530rx,i_6530,200,AC_6530_POOL);
-	//Debug_usart_write(i_6530,i_len,INFO_DEBUG);
 #endif
+	//AC6530_usart_write((uint8_t *)"MEASure:CURRent:AC?\r\n",21);
+	//len = pool_recv_one_command(&externalrx,buf,200,EXTERNAL_WAIT_TIME);
+	//Debug_usart_write(buf,len,INFO_DEBUG);
+
 	//AC6530_usart_write((uint8_t *)"factory?",8);
 	//External_usart_write((uint8_t *)"factory?",8);
 }
@@ -2094,6 +2552,8 @@ int main()
 	uint8_t exce_cnt = 0;
 	uint8_t noadj_cnt = 0;
 	uint8_t cycle_cnt = 0;
+
+	uint32_t time_cnt = 0;
 
 	system_clk_init();
 
@@ -2116,13 +2576,14 @@ int main()
 	//write_coe_from_flash();
 
 	//operate_ch_relay(ch_sta);
+	//relay_test();
 	while (1)
     {
 #if 0
 		if(count_time_flag==1)
 		{
 			len++;
-			if(len == 1)
+			if(len == 2)
 			{
 				len = 0;
 				relay_test();
@@ -2220,6 +2681,14 @@ int main()
 				//Debug_usart_write(data,len,DATA_SEND_RECV_DABUG);
 				if(count_time_flag==1)
 				{
+#if 0
+					time_cnt++;
+					if(time_cnt >= 150)
+					{
+						relay_test();
+						time_cnt = 0;
+					}
+#endif
 					//len = pool_recv_one_command(&cse7766rx,data,500,CSE_7766_POOL);
 					Debug_usart_write(data,len,DATA_SEND_RECV_DABUG);
 					if(len > 0)
