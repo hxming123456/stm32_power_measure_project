@@ -23,6 +23,7 @@ enum{
 	EXTER_READ_C76PVI_DATA_ERR,
 	KEY_CHANGE,
 	SHOW_ALL_AB,
+	EXTER_FAILED,
 	ALL_BLACK,
 }status;
 
@@ -42,5 +43,6 @@ void lcd_show_exter_readc76pvi_error_info();
 void lcd_show_self_read7766_error_info();
 void lcd_show_self_read6530_error_info();
 void lcd_show_exter_c76pvi_data_error_info();
+void lcd_show_exter_stop_info();
 
 #endif

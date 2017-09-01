@@ -461,7 +461,8 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			}
 			if(*ret_i > 1)
 			{
-				*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+				//*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+				*ret_i = i*self_adjust_coea_il_110;
 			}
 			else
 			{
@@ -483,6 +484,7 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			if(*ret_i > 2)
 			{
 				*ret_i = i*self_adjust_coea_i+self_adjust_coeb_i;
+				//*ret_i = i*self_adjust_coea_il;
 			}
 			else
 			{
@@ -647,20 +649,6 @@ void Debug_write_coe110_info(void)
 		Debug_usart_write("-",1,INFO_DEBUG);
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
-	Debug_usart_write("\r\n",2,INFO_DEBUG);
-
-	Debug_usart_write("C_V_110:",8,INFO_DEBUG);
-	if(c_v>0)
-	{
-		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
-	}
-	else
-	{
-		c_v = -c_v;
-		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
-		Debug_usart_write("-",1,INFO_DEBUG);
-	}
-	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -706,7 +694,7 @@ void Debug_write_coe110_info(void)
 	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n",2,INFO_DEBUG);
 
-	Debug_usart_write("C_V:",4,INFO_DEBUG);
+	Debug_usart_write("C_V_110:",8,INFO_DEBUG);
 	if(c_v>0)
 	{
 		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
@@ -867,22 +855,7 @@ void Debug_write_coe_info(void)
 		Debug_usart_write("-",1,INFO_DEBUG);
 	}
 	Debug_usart_write(buf,6,INFO_DEBUG);
-	Debug_usart_write("\r\n",2,INFO_DEBUG);
-
-	Debug_usart_write("C_V:",4,INFO_DEBUG);
-	if(c_v>0)
-	{
-		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
-	}
-	else
-	{
-		c_v = -c_v;
-		flodou_to_string(c_v,buf,Get_double_mantissa_len(&c_v),4);
-		Debug_usart_write("-",1,INFO_DEBUG);
-	}
-	Debug_usart_write(buf,6,INFO_DEBUG);
 	Debug_usart_write("\r\n\r\n",4,INFO_DEBUG);
-
 	//////////////////////////////////////////////////////////////////////////////////
 	Debug_usart_write("I_A:",4,INFO_DEBUG);
 	if(i_a>0)
@@ -1856,15 +1829,31 @@ int32_t Go_self_adjust(void)
 				pp_6530[p_cnt] = p_6530[m];
 				pp_7766[p_cnt] = p_7766[m];
 				p_cnt++;
+
+				flodou_to_string(pp_6530[p_cnt],test_buf,5,4);
+				Debug_usart_write(test_buf,10,TEST_DEBUG);
+				Debug_usart_write("\t",1,TEST_DEBUG);
+
+				flodou_to_string(pp_7766[p_cnt],test_buf,5,4);
+				Debug_usart_write(test_buf,10,TEST_DEBUG);
+				Debug_usart_write("\t",1,TEST_DEBUG);
 			}
 		}
 		if(i_6530[m] > 0.0001 && i_7766[m] > 0.0001)
 		{
 			if((i_7766[m] > (i_6530[m]*0.7)) && (i_7766[m] < (i_6530[m]*1.3)))
 			{
-				ii_6530[p_cnt] = i_6530[m];
-				ii_7766[p_cnt] = i_7766[m];
+				ii_6530[i_cnt] = i_6530[m];
+				ii_7766[i_cnt] = i_7766[m];
 				i_cnt++;
+
+				flodou_to_string(ii_6530[i_cnt],test_buf,5,4);
+				Debug_usart_write(test_buf,10,TEST_DEBUG);
+				Debug_usart_write("\t",1,TEST_DEBUG);
+
+				flodou_to_string(ii_7766[i_cnt],test_buf,5,4);
+				Debug_usart_write(test_buf,10,TEST_DEBUG);
+				Debug_usart_write("\t",1,TEST_DEBUG);
 			}
 		}
 	}
@@ -1872,8 +1861,8 @@ int32_t Go_self_adjust(void)
 
 	Get_coe_a_b_r(p_7766,pp_6530,16,&coea_pl,&coeb_pl,&coer_pl);
 	Get_coe_a_b_r(p_7766,pp_6530,p_cnt,&coea_ph,&coeb_ph,&coer_ph);
-	Get_coe_a_b_r(i_7766,i_6530,31,&coea_il,&coeb_il,&coer_il);
-	Get_coe_a_b_r(&i_7766[32],&i_6530[32],4,&coea_i,&coeb_i,&coer_i);
+	Get_coe_a_b_r(ii_7766,ii_6530,31,&coea_il,&coeb_il,&coer_il);
+	Get_coe_a_b_r(&ii_7766[32],&ii_6530[32],4,&coea_i,&coeb_i,&coer_i);
 
 	if((coer_pl > 0.9) && (coer_i > 0.9) && (coer_ph > 0.9) && (coer_il > 0.9) )
 	{
@@ -2270,7 +2259,7 @@ int32_t Go_external_adjust(void)
 				else
 				{
 					//self_i[i] = self_i[i]*self_adjust_coea_il_110+self_adjust_coeb_il_110;
-					self_i[i] = self_i[i]*self_adjust_coea_il_110;
+					self_i[i] = self_i[i]*self_adjust_coea_i;
 				}
 			}
 			else
@@ -2311,7 +2300,7 @@ int32_t Go_external_adjust(void)
 			Debug_usart_write("\r\n\r\n",4,TEST_DEBUG);
 
 
-			lcd_change_percent_info(3*i);
+			lcd_change_percent_info(6*i);
 		}
 
 		lcd_change_percent_info(100);
@@ -2331,7 +2320,7 @@ int32_t Go_external_adjust(void)
 			}
 			if(exter_i[m] > 0.0001 && self_i[m] > 0.0001)
 			{
-				if((self_i[m] > exter_i[m]*0.7) && (self_i[m] < exter_i[m]*1.3))
+				if((self_i[m] > exter_i[m]*0.5) && (self_i[m] < exter_i[m]*1.5))
 				{
 					exter_ii[i_cnt] = exter_i[m];
 					self_ii[i_cnt] = self_i[m];
@@ -2387,10 +2376,10 @@ int32_t Go_external_adjust(void)
 
 		Get_coe_a_b_r(exter_pp,self_pp,8,&ex_coea_pl,&ex_coeb_pl,&ex_coer_pl);
 		Get_coe_a_b_r(exter_pp,self_pp,p_cnt,&ex_coea_p,&ex_coeb_p,&ex_coer_p);
-		Get_coe_a_b_r(exter_ii,self_ii,14,&ex_coea_il,&ex_coeb_il,&ex_coer_il);
-		Get_coe_a_b_r(&exter_ii[15],&self_ii[15],4,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
+		Get_coe_a_b_r(exter_ii,self_ii,i_cnt-4,&ex_coea_il,&ex_coeb_il,&ex_coer_il);
+		Get_coe_a_b_r(&exter_ii[i_cnt-3],&self_ii[i_cnt-3],3,&ex_coea_i,&ex_coeb_i,&ex_coer_i);
 
-		ex_coeb_i = 0;
+		//ex_coeb_i = 0;
 
 		if((ex_coer_p > 0.9) && (ex_coer_i > 0.9) && (ex_coer_pl > 0.9) && (ex_coer_il > 0.9))
 		{
@@ -2552,6 +2541,7 @@ int main()
 	uint8_t exce_cnt = 0;
 	uint8_t noadj_cnt = 0;
 	uint8_t cycle_cnt = 0;
+	uint8_t exter_err_cnt = 0;
 
 	uint32_t time_cnt = 0;
 
@@ -2637,31 +2627,42 @@ int main()
 				Debug_usart_write("external_adjust over\r\n",22,INFO_DEBUG);
 				if(ad_ret == -3)
 				{
+					exter_err_cnt = 0;
 					operate_mode = 5;
 					lcd_show_recvc76_err_info();
 				}
 				if(ad_ret == -1)
 				{
+					exter_err_cnt = 0;
 					operate_mode = 5;
 					Debug_usart_write("read 7766 err.....\r\n",20,INFO_DEBUG);
 					lcd_show_exter_read7766_error_info();
 				}
 				if(ad_ret == -2)
 				{
+					exter_err_cnt = 0;
 					operate_mode = 5;
 					lcd_show_exter_readc76pvi_error_info();
 				}
 				if(ad_ret == -4)
 				{
+					exter_err_cnt = 0;
 					operate_mode = 5;
 					lcd_show_exter_c76pvi_data_error_info();
 				}
 				if(ad_ret == 0)
 				{
-					;
+					exter_err_cnt++;
+					if(exter_err_cnt == 3)
+					{
+						exter_err_cnt = 0;
+						operate_mode = 5;
+						lcd_show_exter_stop_info();
+					}
 				}
 				if(ad_ret == 1)
 				{
+					exter_err_cnt = 0;
 					operate_mode = 5;
 				}
 			}

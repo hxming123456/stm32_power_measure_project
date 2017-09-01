@@ -76,7 +76,7 @@ void iic_2864_clear_one(uint8_t sta)
 {
 	static uint8_t old_sta = 0;
 
-	if(old_sta != sta)
+	if((old_sta != sta) || (sta==KEY_CHANGE))
 	{
 		old_sta = sta;
 		iic_2864_fill(COLOR_BLACK);

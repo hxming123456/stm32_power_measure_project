@@ -28,8 +28,8 @@ src/iic_2864_operate.o: ../src/iic_2864_operate.c \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
  ../system/include/stm32f1-stdperiph/misc.h ../src/bsp_iic_2864.h \
- ../src/iic_2864_gpio_simulate.h ../src/fonts.h ../src/bsp_usart.h \
- ../src/Data_pool.h
+ ../src/iic_2864_gpio_simulate.h ../src/lcd_show_content.h ../src/Clib.h \
+ ../src/main.h ../src/fonts.h ../src/bsp_usart.h ../src/Data_pool.h
 
 ../src/iic_2864_operate.h:
 
@@ -96,6 +96,12 @@ src/iic_2864_operate.o: ../src/iic_2864_operate.c \
 ../src/bsp_iic_2864.h:
 
 ../src/iic_2864_gpio_simulate.h:
+
+../src/lcd_show_content.h:
+
+../src/Clib.h:
+
+../src/main.h:
 
 ../src/fonts.h:
 

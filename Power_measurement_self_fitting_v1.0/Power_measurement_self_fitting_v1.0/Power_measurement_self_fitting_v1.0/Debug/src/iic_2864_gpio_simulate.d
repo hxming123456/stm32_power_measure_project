@@ -1,6 +1,6 @@
 src/iic_2864_gpio_simulate.o: ../src/iic_2864_gpio_simulate.c \
- ../src/iic_2864_gpio_simulate.h ../system/include/cmsis/stm32f10x.h \
- ../system/include/cmsis/core_cm3.h \
+ ../src/iic_2864_gpio_simulate.h ../src/lcd_show_content.h \
+ ../system/include/cmsis/stm32f10x.h ../system/include/cmsis/core_cm3.h \
  ../system/include/cmsis/core_cmInstr.h \
  ../system/include/cmsis/cmsis_gcc.h \
  ../system/include/cmsis/core_cmFunc.h \
@@ -27,9 +27,13 @@ src/iic_2864_gpio_simulate.o: ../src/iic_2864_gpio_simulate.c \
  ../system/include/stm32f1-stdperiph/stm32f10x_tim.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
- ../system/include/stm32f1-stdperiph/misc.h
+ ../system/include/stm32f1-stdperiph/misc.h ../src/iic_2864_operate.h \
+ ../src/bsp_iic_2864.h ../src/fonts.h ../src/bsp_usart.h \
+ ../src/Data_pool.h ../src/Clib.h ../src/main.h
 
 ../src/iic_2864_gpio_simulate.h:
+
+../src/lcd_show_content.h:
 
 ../system/include/cmsis/stm32f10x.h:
 
@@ -90,3 +94,17 @@ src/iic_2864_gpio_simulate.o: ../src/iic_2864_gpio_simulate.c \
 ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h:
 
 ../system/include/stm32f1-stdperiph/misc.h:
+
+../src/iic_2864_operate.h:
+
+../src/bsp_iic_2864.h:
+
+../src/fonts.h:
+
+../src/bsp_usart.h:
+
+../src/Data_pool.h:
+
+../src/Clib.h:
+
+../src/main.h:

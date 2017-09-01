@@ -29,9 +29,10 @@ src/main.o: ../src/main.c ../system/include/cmsis/stm32f10x.h \
  ../system/include/stm32f1-stdperiph/misc.h \
  ../system/include/diag/Trace.h ../src/bsp_usart.h ../src/Data_pool.h \
  ../src/bsp_tim.h ../src/main.h ../src/iic_2864_operate.h \
- ../src/bsp_iic_2864.h ../src/iic_2864_gpio_simulate.h ../src/fonts.h \
+ ../src/bsp_iic_2864.h ../src/iic_2864_gpio_simulate.h \
+ ../src/lcd_show_content.h ../src/Clib.h ../src/fonts.h \
  ../src/Fitting_method.h ../src/bsp_internal_flash.h \
- ../src/lcd_show_content.h ../src/Clib.h ../src/WrRe_coe_from_flash.h
+ ../src/WrRe_coe_from_flash.h
 
 ../system/include/cmsis/stm32f10x.h:
 
@@ -109,14 +110,14 @@ src/main.o: ../src/main.c ../system/include/cmsis/stm32f10x.h \
 
 ../src/iic_2864_gpio_simulate.h:
 
+../src/lcd_show_content.h:
+
+../src/Clib.h:
+
 ../src/fonts.h:
 
 ../src/Fitting_method.h:
 
 ../src/bsp_internal_flash.h:
-
-../src/lcd_show_content.h:
-
-../src/Clib.h:
 
 ../src/WrRe_coe_from_flash.h:

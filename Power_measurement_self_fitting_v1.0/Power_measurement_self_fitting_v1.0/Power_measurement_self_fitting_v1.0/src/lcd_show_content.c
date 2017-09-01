@@ -133,6 +133,14 @@ void lcd_show_exter_c76pvi_data_error_info()
 	iic_2864_Puts(0,2,(uint8_t *)"Data Err.",&Font_11x18,(uint8_t)COLOR_WHITE);
 }
 
+void lcd_show_exter_stop_info()
+{
+	iic_2864_clear_one(EXTER_FAILED);
+	iic_2864_Puts(0,0,(uint8_t *)"exter adj:",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,1,(uint8_t *)"Error:c76",&Font_11x18,(uint8_t)COLOR_WHITE);
+	iic_2864_Puts(0,2,(uint8_t *)"Ad Failed",&Font_11x18,(uint8_t)COLOR_WHITE);
+}
+
 #if 1
 void lcd_show_coe_abr_info(double a,double b,double r)
 {

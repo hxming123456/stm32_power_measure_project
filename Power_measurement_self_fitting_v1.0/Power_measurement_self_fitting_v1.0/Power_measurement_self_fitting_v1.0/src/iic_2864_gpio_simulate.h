@@ -1,6 +1,7 @@
 #ifndef __IIC_2864_GPIO_SIMULATE_H
 #define __IIC_2864_GPIO_SIMULATE_H
 
+#include "lcd_show_content.h"
 #include "stm32f10x.h"
 
 #define I2C_SCL_HIGH         GPIO_SetBits(GPIOB,GPIO_Pin_8);//GPIOB->BRR=GPIO_Pin_8;
