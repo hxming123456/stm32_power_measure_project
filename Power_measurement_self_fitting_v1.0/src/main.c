@@ -461,8 +461,7 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			}
 			if(*ret_i > 1)
 			{
-				//*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
-				*ret_i = i*self_adjust_coea_il_110;
+				*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
 			}
 			else
 			{
@@ -2258,7 +2257,7 @@ int32_t Go_external_adjust(void)
 				else
 				{
 					//self_i[i] = self_i[i]*self_adjust_coea_il_110+self_adjust_coeb_il_110;
-					self_i[i] = self_i[i]*self_adjust_coea_i;
+					self_i[i] = self_i[i]*self_adjust_coea_il;
 				}
 			}
 			else
