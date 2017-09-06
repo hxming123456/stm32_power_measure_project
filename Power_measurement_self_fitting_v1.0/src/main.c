@@ -462,6 +462,7 @@ uint8_t Get_compute_pvi(uint8_t *data,uint32_t len,double *ret_p,double *ret_v,d
 			if(*ret_i > 1)
 			{
 				*ret_i = i*self_adjust_coea_i_110+self_adjust_coeb_i_110;
+				//*ret_i = i*self_adjust_coea_il_110;
 			}
 			else
 			{
@@ -934,13 +935,13 @@ void key_operate(void)
 	    	}
 	    	if(SELF_ADJUST_KEY_READ==0)
 	    	{
-#if 1
+#if 0
 	    		if(operate_mode != 0)
 	    			operate_mode = 0;
 	    		else
 	    			operate_mode = SELF_ADJUST_MODE;
 #endif
-//	    		relay_test();
+	    		relay_test();
 	    	}
 	    	if(EXTERNAL_KEY_READ==0)
 	    	{
@@ -1173,6 +1174,7 @@ uint8_t  Check_c76_return_isok(uint8_t *data,uint32_t len)
 uint32_t Get_computer_external_pvi(uint8_t *data,uint32_t len,double *p,double *v,double *i)
 {
 	uint8_t tmp = 0;
+	uint8_t c = 0;
 	uint8_t ok_cnt = 0;
 	uint8_t m = 0,n = 0;;
 	uint8_t y = 0;
@@ -2069,7 +2071,7 @@ int32_t Go_external_adjust(void)
 				if(external_wait_flag==1)
 				{
 					read_count++;
-					if(read_count >= 7)
+					if(read_count >= 12)
 					{
 						read_count = 0;
 						break;
@@ -2318,7 +2320,7 @@ int32_t Go_external_adjust(void)
 			}
 			if(exter_i[m] > 0.0001 && self_i[m] > 0.0001)
 			{
-				if((self_i[m] > exter_i[m]*0.5) && (self_i[m] < exter_i[m]*1.5))
+				if((self_i[m] > exter_i[m]*0.7) && (self_i[m] < exter_i[m]*1.3))
 				{
 					exter_ii[i_cnt] = exter_i[m];
 					self_ii[i_cnt] = self_i[m];
@@ -2501,7 +2503,7 @@ void Check_c76_fac(void)
 void relay_test(void)
 {
 	static uint8_t i = 0;
-	//uint8_t buf[50] = {0};
+	uint8_t buf[50] = {0};
 	uint32_t len = 0;
 	uint8_t ch_sta[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	uint32_t load_size[36] = {1,3,4,6,8,10,11,13,14,15,16,18,20,21,23,25,26,28,30,33,34,36,38,
